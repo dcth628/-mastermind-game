@@ -1495,3 +1495,4 @@ Return spots filtered by query parameters.
       ]
     }
     ```
+# -mastermind-game
