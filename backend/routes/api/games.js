@@ -1,4 +1,5 @@
 const express = require('express')
+const axios = require('axios');
 const { Op } = require('sequelize')
 const { setTokenCookie, requireAuth, restoreUser } = require('../../utils/auth')
 const { Spot, User, Image, Review, Booking, sequelize } = require('../../db/models');
@@ -7,62 +8,131 @@ const { handleValidationErrors } = require('../../utils/validation');
 const e = require('express');
 const router = express.Router();
 
-const validateCreatebooking = [
-    check('endDate')
-        .exists()
-        .isBefore('startDate')
-        .withMessage('endDate cannot be on or before startDate'),
-    check('endDate')
-        .exists()
-        .isAfter('startDate')
-        .withMessage('startDate cannot be on or after endDate'),
-    handleValidationErrors
-]
+// const validateCreatebooking = [
+//     check('endDate')
+//         .exists()
+//         .isBefore('startDate')
+//         .withMessage('endDate cannot be on or before startDate'),
+//     check('endDate')
+//         .exists()
+//         .isAfter('startDate')
+//         .withMessage('startDate cannot be on or after endDate'),
+//     handleValidationErrors
+// ]
 
-const validateCreatereview = [
-    check('review')
-        .exists({ checkFalsy: true })
-        .withMessage('Review text is required'),
-    check('stars')
-        .isInt({ min: 0, max: 5 })
-        .withMessage('Stars must be from 1 to 5'),
-    handleValidationErrors
-]
 
-const validateCreatespot = [
-    check('address')
-        .exists({ checkFalsy: true })
-        .withMessage('Street address is required'),
-    check('city')
-        .exists({ checkFalsy: true })
-        .withMessage('City is required'),
-    check('state')
-        .exists({ checkFalsy: true })
-        .withMessage('State is required'),
-    check('country')
-        .exists({ checkFalsy: true })
-        .withMessage('Country is required'),
-    check('lat')
-        .exists({ checkFalsy: true })
-        .isDecimal()
-        .withMessage('Latitude is not valid'),
-    check('lng')
-        .exists({ checkFalsy: true })
-        .isDecimal()
-        .withMessage('Longitude is not valid'),
-    check('name')
-        .exists({ checkFalsy: true })
-        .isLength({ max: 50 })
-        .withMessage('Name must be less than 50 characters'),
-    check('description')
-        .exists({ checkFalsy: true })
-        .withMessage('Description is required'),
-    check('price')
-        .exists({ checkFalsy: true })
-        .withMessage('Price per day is required'),
-    handleValidationErrors
-]
+// Store the secret number
+let gameNumbers = [];
+// Store the remaining attempt
+let attemptsRemaining = 10;
+// Store the guess history
+let guessHistory = [];
+// Set hint usage
+let hint = false;
 
+function checkGuess(guess, gameNumbers) {
+    let correct = 0;
+    let misplaced = 0;
+
+    // Use arrays to keep track of numbers that have been successfully matched,
+    // to ensure they aren't reused in the misplaced count.
+    let remainingGuess = [];
+    let remainingSecret = [];
+
+    // First pass: Check for correct numbers in the correct positions
+    for (let i = 0; i < guess.length; i++) {
+        if (guess[i] === gameNumbers[i]) {
+            correct++;
+        } else {
+            remainingGuess.push(guess[i]);
+            remainingSecret.push(gameNumbers[i]);
+        }
+    }
+
+    // Second pass: Check for correct numbers in the wrong positions
+    for (let digit of remainingGuess) {
+        const index = remainingSecret.indexOf(digit);
+        if (index !== -1) {
+            misplaced++;
+            remainingSecret.splice(index, 1); // Remove the matched element to prevent reuse
+        }
+    }
+
+    return { correct, misplaced };
+}
+
+
+// Get Random Numbers
+router.get(
+    '/random-Number',
+    async (req, res) => {
+        const max = req.body.max ? parseInt(req.body.max, 10) : 7;
+        console.log(req.body)
+        const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
+        try {
+            // Use axios to get the response from Random.org
+            const response = await axios.get(url);
+            const numbers = response.data.trim().split('\n').map(Number);
+            // Send the numbers back to the frontend
+            // Reset the attemptsReaining whenever a new game
+            // Reset the guessHistory to 0 for a new game
+            gameNumbers = numbers;
+            attemptsRemaining = 10;
+            guessHistory = []
+            res.json(numbers);
+        } catch (error) {
+            // Handle errors (e.g., Random.org not reachable or network issues)
+            console.error('Failed to fetch random numbers:', error);
+            res.status(500).send('Failed to fetch random numbers');
+        }
+    }
+)
+
+
+// Check the results
+router.post(
+    '/result',
+    async (req, res) => {
+        if (attemptsRemaining <= 0) {
+            return res.status(400).json({ error: "No attempts left, start a new game." });
+        }
+        const userGuessObject = req.body;
+        const userGuess = Object.values(userGuessObject).map(Number)
+        if (!userGuess || userGuess.length !== 4) {
+            return res.status(400).json({ "error": "Invalid Guess" });
+        }
+        let times = guessHistory.length + 1;
+        const result = checkGuess(userGuess, gameNumbers);
+        guessHistory.push({ [times]: userGuess, result })
+        attemptsRemaining--;
+        return res.json({ result, attemptsRemaining });
+    }
+)
+
+// Get guess history
+router.get(
+    '/history',
+    async (req, res) => {
+        let times = 0
+        res.json({ history: guessHistory, attemptsRemaining });
+    }
+)
+
+// Get hint
+router.get(
+    '/hint',
+    async (req, res) => {
+        if (hint) {
+            return res.status(400).json({ error: "Hint already used." })
+        }
+
+        const uniqueDigits = new Set(gameNumbers);
+        const randomDigit = Array.from(uniqueDigits)[Math.floor(Math.random() * uniqueDigits.size)];
+        hint = true;  // Set this to true so no further hints can be used, adjust as per game rules
+
+        res.json({ hint: `The number ${randomDigit} is part of the secret code.` });
+    }
+)
 // Get all spots
 router.get(
     '/',
@@ -117,16 +187,16 @@ router.get(
             }
 
             const rating = await Review.findAll({
-                where: {spotId: spot.id}
+                where: { spotId: spot.id }
             })
 
             let sum = 0;
 
             if (rating.length) {
-                rating.forEach(rating =>{
+                rating.forEach(rating => {
                     sum += rating.stars
                 });
-                let avg = sum /rating.length;
+                let avg = sum / rating.length;
 
                 spot.avgRating = avg
             } else {
@@ -184,16 +254,16 @@ router.get(
             }
 
             const rating = await Review.findAll({
-                where: {spotId: spot.id}
+                where: { spotId: spot.id }
             })
 
             let sum = 0;
 
             if (rating.length) {
-                rating.forEach(rating =>{
+                rating.forEach(rating => {
                     sum += rating.stars
                 });
-                let avg = sum /rating.length;
+                let avg = sum / rating.length;
 
                 spot.avgRating = avg
             } else {
@@ -207,7 +277,7 @@ router.get(
                 stateCode: 404
             })
         }
-        res.json({Spots: spots})
+        res.json({ Spots: spots })
     }
 )
 
@@ -267,16 +337,16 @@ router.get(
             }
 
             const rating = await Review.findAll({
-                where: {spotId: req.params.spotId}
+                where: { spotId: req.params.spotId }
             })
 
             let sum = 0;
 
             if (rating.length) {
-                rating.forEach(rating =>{
+                rating.forEach(rating => {
                     sum += rating.stars
                 });
-                let avg = sum /rating.length;
+                let avg = sum / rating.length;
 
                 spot.avgRating = avg
             } else {
@@ -292,14 +362,13 @@ router.get(
                 stateCode: 404
             })
         }
-        res.json( spot );
+        res.json(spot);
     }
 );
 
 // Create a spot
 router.post(
     '/',
-    validateCreatespot,
     async (req, res) => {
         const userId = req.user.id
         const {
@@ -433,7 +502,6 @@ router.get(
 // Create a review for a spot by spotId
 router.post(
     '/:spotId/reviews',
-    validateCreatereview,
     async (req, res) => {
         const spot = await Spot.findByPk(req.params.spotId);
         if (!spot) {
