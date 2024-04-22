@@ -24,11 +24,13 @@ const router = express.Router();
 // Store the secret number
 let gameNumbers = [];
 // Store the remaining attempt
-let attemptsRemaining = 10;
+let rounds = 10;
 // Store the guess history
 let guessHistory = [];
 // Set hint usage
 let hint = false;
+// Set Difficulty
+let difficulty = 1;
 
 function checkGuess(guess, gameNumbers) {
     let correct = 0;
@@ -58,33 +60,45 @@ function checkGuess(guess, gameNumbers) {
         }
     }
 
+    // console.log(remainingGuess)
+    // console.log(remainingSecret)
     return { correct, misplaced };
 }
 
 
 // Get Random Numbers
-router.get(
+router.post(
     '/random-Number',
     async (req, res) => {
         const max = req.body.max ? parseInt(req.body.max, 10) : 7;
-        console.log(req.body)
         const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
+        // Check the difficulty of game and update the number for scores
+        if (max === 8) {
+            difficulty = 2;
+        } else if (max === 9) {
+            difficulty = 3;
+        }
+
+        let numbers = [];
         try {
             // Use axios to get the response from Random.org
             const response = await axios.get(url);
-            const numbers = response.data.trim().split('\n').map(Number);
-            // Send the numbers back to the frontend
-            // Reset the attemptsReaining whenever a new game
-            // Reset the guessHistory to 0 for a new game
-            gameNumbers = numbers;
-            attemptsRemaining = 10;
-            guessHistory = []
-            res.json(numbers);
+            numbers = response.data.trim().split('\n').map(Number);
         } catch (error) {
-            // Handle errors (e.g., Random.org not reachable or network issues)
-            console.error('Failed to fetch random numbers:', error);
-            res.status(500).send('Failed to fetch random numbers');
+            // If an error occurs (like no internet), generate numbers locally
+            console.error('Failed to fetch random numbers from Random.org, generating locally:', error);
+            while (numbers.length < 4) {
+                const number = Math.floor(Math.random() * (max + 1)); // max + 1 because the max number is exclusive
+                numbers.push(number);
+            }
         }
+
+        // Game settings reset
+        gameNumbers = numbers;
+        rounds = 10;
+        guessHistory = [];
+        hint = false;
+        res.json(gameNumbers);
     }
 )
 
@@ -93,7 +107,7 @@ router.get(
 router.post(
     '/result',
     async (req, res) => {
-        if (attemptsRemaining <= 0) {
+        if (rounds <= 0) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
         const userGuessObject = req.body;
@@ -103,9 +117,16 @@ router.post(
         }
         let times = guessHistory.length + 1;
         const result = checkGuess(userGuess, gameNumbers);
-        guessHistory.push({ [times]: userGuess, result })
-        attemptsRemaining--;
-        return res.json({ result, attemptsRemaining });
+        guessHistory.push({ [times]: userGuess, result, rounds })
+        rounds--;
+
+        console.log(difficulty)
+        if (Object.values(result)[0] === 4) {
+            let score = rounds * difficulty * 100
+            return res.json(`congrats! You won. The number is ${gameNumbers.join('')}. Your scor is ${score}!`)
+        }
+
+        return res.json({ result, rounds });
     }
 )
 
@@ -113,8 +134,7 @@ router.post(
 router.get(
     '/history',
     async (req, res) => {
-        let times = 0
-        res.json({ history: guessHistory, attemptsRemaining });
+        res.json({ history: guessHistory });
     }
 )
 
@@ -125,12 +145,12 @@ router.get(
         if (hint) {
             return res.status(400).json({ error: "Hint already used." })
         }
+        //
+        const number = Math.floor(Math.random() * 4);
+        hint = true;  // Set this to true so no further hints can be used
 
-        const uniqueDigits = new Set(gameNumbers);
-        const randomDigit = Array.from(uniqueDigits)[Math.floor(Math.random() * uniqueDigits.size)];
-        hint = true;  // Set this to true so no further hints can be used, adjust as per game rules
-
-        res.json({ hint: `The number ${randomDigit} is part of the secret code.` });
+        console.log(Math.random())
+        res.json({ hint: `The place of ${number + 1} number is ${gameNumbers[number]}.` });
     }
 )
 // Get all spots

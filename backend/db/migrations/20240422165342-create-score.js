@@ -1,9 +1,10 @@
 'use strict';
 let options = {};
-options.tableName= "Images"
+options.tableName= "Scores"
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -14,27 +15,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      url: {
-        type: Sequelize.STRING,
-        allowNull: false
+      userId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Users',
+          key: 'id'
+        }
       },
-      imageType: {
-        type: Sequelize.ENUM('Spot','Review')
-      },
-      imageId: {
+      numbers: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        onDelete: "CASCADE"
-        // references: {
-        //   model: ['Reviews', 'Spots],
-        //   key: 'id'
-        // }
-
-      },
-      preview: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
       },
       createdAt: {
         allowNull: false,
@@ -49,6 +39,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable(options);
+    await queryInterface.dropTable('Scores');
   }
 };

@@ -1,6 +1,6 @@
 'use strict';
 let options = {};
-options.tableName= "Spots"
+options.tableName= "Guesses"
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
@@ -15,52 +15,28 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      ownerId: {
+      gameId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Users',
+          model: 'Games',
           key: 'id'
         }
       },
-      address: {
+      number: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      city: {
-        type: Sequelize.STRING,
+      correct: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      misplaced: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      round: {
+        type: Sequelize.INTEGER,
         allowNull: false
-      },
-      state: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      country: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      lat: {
-        type: Sequelize.DECIMAL(10, 7),
-      },
-      lng: {
-        type: Sequelize.DECIMAL(10, 7)
-      },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      price: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
-      },
-      avgRating: {
-        type: Sequelize.DECIMAL(2, 1)
-      },
-      previewImage: {
-        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -75,6 +51,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable(options);
+    await queryInterface.dropTable('Guesses', options);
   }
 };
