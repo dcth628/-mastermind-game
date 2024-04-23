@@ -29,6 +29,10 @@ module.exports = {
         userId: 4,
         numbers: 1500,
       },
+      {
+        userId: 6,
+        numbers: 1200,
+      },
     ])
   },
 

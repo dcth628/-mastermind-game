@@ -1,75 +1,66 @@
 const express = require('express')
 const axios = require('axios');
-const { Op } = require('sequelize')
-const { setTokenCookie, requireAuth, restoreUser } = require('../../utils/auth')
-const { Spot, User, Image, Review, Booking, sequelize } = require('../../db/models');
+const session = require('express-session');
+const { Game, User, Guess, Score, sequelize } = require('../../db/models');
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
-const e = require('express');
 const router = express.Router();
 
-// const validateCreatebooking = [
-//     check('endDate')
-//         .exists()
-//         .isBefore('startDate')
-//         .withMessage('endDate cannot be on or before startDate'),
-//     check('endDate')
-//         .exists()
-//         .isAfter('startDate')
-//         .withMessage('startDate cannot be on or after endDate'),
-//     handleValidationErrors
-// ]
+// Create a session middleware with the given
+router.use(session({
+    secret: 'bacon_pancake_bacon_pancake',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
 
 // Store the secret number
 let gameNumbers = [];
 // Store the remaining attempt
 let rounds = 10;
-// Store the guess history
-let guessHistory = [];
 // Set hint usage
 let hint = false;
 // Set Difficulty
 let difficulty = 1;
 
 function checkGuess(guess, gameNumbers) {
-    let correct = 0;
-    let misplaced = 0;
-
-    // Use arrays to keep track of numbers that have been successfully matched,
-    // to ensure they aren't reused in the misplaced count.
-    let remainingGuess = [];
-    let remainingSecret = [];
-
-    // First pass: Check for correct numbers in the correct positions
-    for (let i = 0; i < guess.length; i++) {
-        if (guess[i] === gameNumbers[i]) {
-            correct++;
-        } else {
-            remainingGuess.push(guess[i]);
-            remainingSecret.push(gameNumbers[i]);
+    const result = {digit: 0, location: 0}
+    // First: Check the digit is on the correct index
+    guess.forEach((num, index) => {
+        if (num === gameNumbers[index]) {
+            result['location'] += 1;
         }
-    }
+    });
 
-    // Second pass: Check for correct numbers in the wrong positions
-    for (let digit of remainingGuess) {
-        const index = remainingSecret.indexOf(digit);
-        if (index !== -1) {
-            misplaced++;
-            remainingSecret.splice(index, 1); // Remove the matched element to prevent reuse
+    // Second: Check for correct digits in the wrong index
+    let correctDigits = 0;
+    const numCounts = {};
+
+    // Create a count map for game numbers
+    gameNumbers.forEach(num => {
+        numCounts[num] = (numCounts[num] || 0) + 1;
+    });
+
+    // Check for correct digits anywhere in the game numbers
+    guess.forEach(num => {
+        if (numCounts[num] && numCounts[num] > 0) {
+            correctDigits++;
+            numCounts[num]--;
         }
-    }
+    });
 
-    // console.log(remainingGuess)
-    // console.log(remainingSecret)
-    return { correct, misplaced };
-}
+    result['digit'] = correctDigits;
+
+    return result;
+};
 
 
 // Get Random Numbers
 router.post(
     '/random-Number',
     async (req, res) => {
+        const userId = req.user.id;
         const max = req.body.max ? parseInt(req.body.max, 10) : 7;
         const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
         // Check the difficulty of game and update the number for scores
@@ -93,20 +84,30 @@ router.post(
             }
         }
 
+
         // Game settings reset
         gameNumbers = numbers;
         rounds = 10;
-        guessHistory = [];
         hint = false;
-        res.json(gameNumbers);
-    }
-)
 
+        // Add new game to game database
+        const game = await Game.creategame({
+            userId, difficulty, number: numbers.join(''),
+        });
+
+        req.session.gameId = game.id
+        res.json(game);
+    }
+);
 
 // Check the results
 router.post(
     '/result',
     async (req, res) => {
+        const userId = req.user.id;
+        const time = 600;
+        const gameId = req.session.gameId;
+
         if (rounds <= 0) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
@@ -115,28 +116,59 @@ router.post(
         if (!userGuess || userGuess.length !== 4) {
             return res.status(400).json({ "error": "Invalid Guess" });
         }
-        let times = guessHistory.length + 1;
         const result = checkGuess(userGuess, gameNumbers);
-        guessHistory.push({ [times]: userGuess, result, rounds })
+
+
         rounds--;
 
-        console.log(difficulty)
-        if (Object.values(result)[0] === 4) {
-            let score = rounds * difficulty * 100
+        if (result.location === 4 && result.digit === 4) {
+            let score = (rounds + 1) * difficulty * 100
+            // Add score to database
+            const scores = await Score.create({
+                userId,
+                numbers: score
+            })
+            // Add new game to game database
+            const game = await Game.creategame({
+                userId, difficulty, number: userGuess.join(''), time
+            });
+            const guess = await Guess.createguess({
+                gameId,
+                number: userGuess.join(''),
+                location: result.location,
+                digit: result.digit,
+                round: rounds,
+                tiem: time
+            });
             return res.json(`congrats! You won. The number is ${gameNumbers.join('')}. Your scor is ${score}!`)
-        }
-
-        return res.json({ result, rounds });
+        } else {
+            // Add guesses from current game to database
+            const guess = await Guess.createguess({
+                gameId,
+                number: userGuess.join(''),
+                location: result.location,
+                digit: result.digit,
+                round: rounds
+            });
+            return res.json(guess);
+        };
     }
-)
+);
 
 // Get guess history
 router.get(
     '/history',
     async (req, res) => {
-        res.json({ history: guessHistory });
+        const gameId = req.session.gameId
+        const guesses = await Guess.findAll({
+            where: {
+                gameId: gameId
+            }
+        })
+        console.log(guesses)
+        res.json(guesses);
     }
-)
+);
 
 // Get hint
 router.get(
@@ -152,572 +184,140 @@ router.get(
         console.log(Math.random())
         res.json({ hint: `The place of ${number + 1} number is ${gameNumbers[number]}.` });
     }
-)
-// Get all spots
+);
+
+// Get all scores from multiple games
 router.get(
-    '/',
+    '/total-score',
     async (req, res) => {
-        let { page, size } = req.query;
+        const userId = req.user.id;
 
-        page = Number(page);
-        size = Number(size);
-
-        if (Number.isNaN(page)) page = 1;
-        if (Number.isNaN(size)) size = 20
-
-        if (page <= 0) {
-            return res.status(400).json({
-                "message": "Validation Error",
-                "statusCode": 400,
-                "errors": {
-                    "page": "Page must be greater than or equal to 1"
-                }
-            })
-        }
-        if (size <= 0) {
-
-            return res.status(400).json({
-                "message": "Validation Error",
-                "statusCode": 400,
-                "errors": {
-                    "size": "Size must be greater than or equal to 1"
-                }
-            })
-        }
-
-        const spots = await Spot.findAll({
-            limit: size,
-            offset: size * (page - 1)
-        })
-
-        for await (let spot of spots) {
-            const previewImage = await Image.findOne({
-                where: {
-                    imageId: spot.id,
-                    preview: true,
-                    imageType: "Spot"
-                }
-            });
-            if (previewImage && !spot.previewImage) {
-                spot.previewImage = previewImage.url
-            } else if (!previewImage && !spot.previewImage) {
-                spot.previewImage = "None"
-            } else {
-                spot.previewImage = spot.previewImage
-            }
-
-            const rating = await Review.findAll({
-                where: { spotId: spot.id }
-            })
-
-            let sum = 0;
-
-            if (rating.length) {
-                rating.forEach(rating => {
-                    sum += rating.stars
-                });
-                let avg = sum / rating.length;
-
-                spot.avgRating = avg
-            } else {
-                spot.avgRating = 0
-            }
-        }
-
-        res.json({
-            Spots: spots, page, size
-        })
-    }
-)
-
-// Get all spots owned by the current user
-router.get(
-    '/current',
-    requireAuth,
-    async (req, res) => {
-        const { user } = req;
-        const spots = await Spot.findAll({
-            where: {
-                ownerId: user.id
-            },
-            attributes: {
-                include: [
-                    // [
-                    //     sequelize.fn('AVG', sequelize.col("Reviews.stars")),
-                    //     "avgRating"
-                    // ],
-                    // [
-                    //     sequelize.fn('COALESCE', sequelize.col("Images.url")),
-                    //     "previewImage"
-                    // ]
-                ],
-            },
-            include: [
-                // { model: Review, attributes: [] },
-                // { model: Image, as: "ReviewImages"}
-            ]
-        })
-        for await (let spot of spots) {
-            const previewImage = await Image.findOne({
-                where: {
-                    imageId: spot.id,
-                    preview: true,
-                    imageType: "Spot"
-                }
-            });
-            if (previewImage && !spot.previewImage) {
-                spot.previewImage = previewImage.url
-            } else if (!previewImage && !spot.previewImage) {
-                spot.previewImage = "None"
-            } else {
-                spot.previewImage = spot.previewImage
-            }
-
-            const rating = await Review.findAll({
-                where: { spotId: spot.id }
-            })
-
-            let sum = 0;
-
-            if (rating.length) {
-                rating.forEach(rating => {
-                    sum += rating.stars
-                });
-                let avg = sum / rating.length;
-
-                spot.avgRating = avg
-            } else {
-                spot.avgRating = 0
-            }
-        }
-        if (!spots.length) {
-            res.status(404);
-            return res.json({
-                message: "Spot couldn't be found",
-                stateCode: 404
-            })
-        }
-        res.json({ Spots: spots })
-    }
-)
-
-// Get details of a spot from an id
-router.get(
-    '/:spotId',
-    async (req, res) => {
-
-        const spot = await Spot.findByPk(req.params.spotId, {
-            attributes: {
-                include: [
-                    // [
-                    //     sequelize.fn('AVG', sequelize.col("Reviews.stars")),
-                    //     "avgRating"
-                    // ],
-                    [
-                        sequelize.fn('COUNT', sequelize.col("Reviews.id")),
-                        "numReviews"
-                    ]
-                ],
-                exclude: ['ReviewImages']
-            },
-            include: [
-                // { model: Image, as: "ReviewImages" },
-                { model: User, as: "Owner" },
-                { model: Review }
-            ]
+        const scores = await Score.findAll({
+            where: { userId: userId }
         });
+        console.log(scores)
 
-        if (spot) {
-            const previewImage = await Image.findOne({
-                where: {
-                    imageId: req.params.spotId,
-                    preview: true,
-                    imageType: "Spot"
-                }
-            });
+        const totalScore = scores.reduce((acc, cur) => acc + cur.numbers, 0);
+        const userName = req.user.username
 
-
-            spot.dataValues.SpotImages = []
-            const allImages = await Image.findAll({
-                where: {
-                    imageId: req.params.spotId,
-                    imageType: "Spot"
-                }
-            })
-            spot.dataValues.SpotImages = [...allImages]
-
-
-            if (previewImage && !spot.previewImage) {
-                spot.previewImage = previewImage.url
-                // spot.dataValues.SpotImages.push(previewImage.url)
-            } else if (!previewImage && !spot.previewImage) {
-                spot.previewImage = "None"
-            } else {
-                spot.previewImage = spot.previewImage
-            }
-
-            const rating = await Review.findAll({
-                where: { spotId: req.params.spotId }
-            })
-
-            let sum = 0;
-
-            if (rating.length) {
-                rating.forEach(rating => {
-                    sum += rating.stars
-                });
-                let avg = sum / rating.length;
-
-                spot.avgRating = avg
-            } else {
-                spot.avgRating = 0
-            }
-        }
-
-        if (spot.id === null) {
-
-            res.status(404);
-            return res.json({
-                message: "Spot couldn't be found",
-                stateCode: 404
-            })
-        }
-        res.json(spot);
+        return res.json({ [userName]: totalScore })
     }
 );
 
-// Create a spot
-router.post(
-    '/',
-    async (req, res) => {
-        const userId = req.user.id
-        const {
-            address,
-            city,
-            state,
-            country,
-            lat,
-            lng,
-            name,
-            description,
-            price,
-            ownerId = userId,
-            previewImage
-        } = req.body;
-        const spot = await Spot.createspot({
-            ownerId, address, city, state, country, lat, lng, name, description, price, previewImage
-        });
-
-        spot.dataValues.previewImage = previewImage
-
-        return res.status(201).json(spot)
-    }
-)
-
-// Delete a spot by spotId
-router.delete(
-    '/:spotId',
-    requireAuth,
-    async (req, res) => {
-        const spot = await Spot.findByPk(req.params.spotId);
-        if (!spot) {
-            res.status(404);
-            return res.json({ message: 'Spot not found' })
-        }
-        if (req.user.id !== spot.ownerId) {
-            const err = new Error('Forbidden')
-            res.status(403);
-            res.json({
-                message: err.message,
-                statusCode: 403
-            })
-        }
-
-        await spot.destroy();
-        return res.status(200).json(spot)
-    }
-
-)
-
-// Edit a spot
-router.put(
-    '/:spotId',
-    async (req, res) => {
-        const { address, city, state, country, lat, lng, name, description, price, previewImage } = req.body;
-        const spot = await Spot.scope("currentSpot").findByPk(req.params.spotId);
-        if (!spot) res.status(404).json({ message: "Spot couldn't be found" });
-        spot.address = address;
-        spot.city = city;
-        spot.state = state;
-        spot.country = country;
-        spot.lat = lat;
-        spot.lng = lng;
-        spot.name = name;
-        spot.description = description;
-        spot.price = price;
-        spot.previewImage = previewImage;
-        spot.dataValues.previewImage = previewImage;
-        await spot.save();
-        res.json(spot)
-    }
-)
-
-// Add a image to a spot by spotId
-router.post(
-    '/:spotId/images',
-    async (req, res) => {
-        const spot = await Spot.findByPk(req.params.spotId);
-        if (!spot) {
-            res.status(404);
-            return res.json({
-                message: "Spot couldn't be found",
-                stateCode: 404
-            })
-        }
-        const {
-            url,
-            preview,
-        } = req.body;
-        const image = await Image.create({
-            url, preview,
-            imageId: req.params.spotId,
-            imageType: "Spot"
-        })
-        const resObject = {
-            id: image.id,
-            url: image.url,
-            preview: image.preview
-        }
-        return res.status(201).json(resObject)
-    }
-)
-
-// Get all reviews by a spotId
+// Get all scores from multiple players
 router.get(
-    '/:spotId/reviews',
+    '/all-score',
     async (req, res) => {
-        const spotReview = await Review.findAll({
-            where: {
-                spotId: req.params.spotId
-            },
+
+        const score = await Score.findAll({
+            attributes: ['userId', 'numbers'],
             include: [{
                 model: User,
-                attributes: { exclude: ['username', 'email', 'hashedPassword', 'createdAt', 'updatedAt'] }
-            }, {
-                model: Image, as: "ReviewImages",
-                attributes: { exclude: ['imageType', 'imageId', 'preview', 'createdAt', 'updatedAt'] }
+                as: 'Player',
+                attributes: ['username']
             }]
         });
-        if (!spotReview.length) {
-            res.status(404);
-            return res.json({
-                message: "Spot couldn't be found",
-                statusCode: 404
-            })
-        }
-        res.json({ Reviews: spotReview })
+
+        const scores = Object.values(score).map(entry => entry.dataValues);
+
+        const allScores = scores.map(score => {
+            return {
+                userId: score.userId,
+                numbers: score.numbers,
+                Player: score.Player.username  // Flattening the object {player: {username: abcde}} => {player: abcde}
+            };
+        });
+
+        const scoreList = allScores.reduce((acc, { userId, numbers, Player }) => {
+            if (acc[userId]) {
+                acc[userId].numbers += numbers;  // Add to existing userId's numbers
+            } else {
+                acc[userId] = { userId, numbers, Player };  // Initialize new userId entry
+            }
+            return acc;
+        }, {});
+
+        const scoreRanking = Object.values(scoreList).sort((a, b) => b.numbers - a.numbers)
+
+        return res.json(scoreRanking)
     }
-)
+);
 
-// Create a review for a spot by spotId
-router.post(
-    '/:spotId/reviews',
-    async (req, res) => {
-        const spot = await Spot.findByPk(req.params.spotId);
-        if (!spot) {
-            res.status(404);
-            return res.json({
-                message: "Spot couldn't be found",
-                statusCode: 404
-            })
-        }
-        const userId = await Review.findOne({
-            where: { userId: req.user.id },
-            include: [{
-                model: Spot,
-                where: { id: req.params.spotId }
-            }]
-        })
-        if (userId) {
-            const err = new Error('User already has a review for this spot')
-            res.status(403).json({
-                message: err.message,
-                statusCode: 403,
-            })
-        }
-
-        const { review, stars } = req.body;
-        const newReview = await Review.create({
-            userId: req.user.id,
-            spotId: req.params.spotId,
-            review, stars
-        })
-        return res.status(201).json(newReview)
-    }
-)
-
-
-//Get all bookings by spotId
+// Get all games
 router.get(
-    '/:spotId/bookings',
+    '/all-game',
     async (req, res) => {
 
-        const spot = await Spot.findByPk(req.params.spotId)
-        if (!spot) {
-            res.status(404).json({
-                message: "Spot couldn't be found",
-                statusCode: 404
-            })
-        }
-        if (spot.ownerId === req.user.id) {
-            const bookings = await Booking.findAll({
-                where: {
-                    spotId: req.params.spotId,
-                    userId: req.user.id
-                },
-                include: {
-                    model: User,
-                    attributes: { exclude: ['username', 'email', 'hashedPassword', 'createdAt', 'updatedAt'] }
-                },
-            })
-            return res.status(200).json({ Bookings: bookings })
-        } else {
-            const bookings = await Booking.findAll({
-                where: {
-                    spotId: req.params.spotId,
-                },
-                attributes: {
-                    exclude: ['id', 'userId', 'createdAt', 'updatedAt']
-                }
-            })
-            return res.status(200).json({ Bookings: bookings })
-        }
+        const games = await Game.findAll({
+            attributes: ['id', 'userId', 'number', 'difficulty'],
+        });
+
+        return res.json(games)
     }
-)
+);
 
-//Create a bookings by spotId
-router.post(
-    '/:spotId/bookings',
-    // validateCreatebooking,
+// Get the fastest game
+router.get(
+    '/fast-time',
     async (req, res) => {
-        const { startDate, endDate } = req.body;
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        const time = await Game.findAll({
+            order: [['time', 'ASC']], // Assuming 'time' stores the duration in seconds or a similar unit
+            attributes: ['userId', 'time', 'difficulty'],
+            include: [{
+                model: User,
+                as: 'Player',
+                attributes: ['username']
+            }]
+        });
 
-        const spot = await Spot.findByPk(req.params.spotId);
+        const times = Object.values(time).map(entry => entry.dataValues);
 
+        const allTimes = times.map(time => {
+            return {
+                userId: time.userId,
+                time: time.time,
+                difficulty: time.difficulty,
+                Player: time.Player.username  // Flattening the object {player: {username: abcde}} => {player: abcde}
+            };
+        });
 
-        if (!spot) {
-            return res.status(404).json({
-                message: "Spot couldn't be found",
-                statusCode: 404
-            })
-        };
-        if (start >= end) {
-            return res.status(400).json({
-                message: "Validation error",
-                statusCode: 400,
-                error: ["endDate cannot be on or before startDate"]
-            })
-        }
+        return res.json(allTimes)
+    }
+);
 
-        const bookings = await Booking.findAll({
-            include: {
-                model: Spot,
-                where: {
-                    id: req.params.spotId
-                }
+// Get fewest guess attempts
+router.get(
+    '/less-round',
+    async (req, res) => {
+
+        const round = await Guess.findAll({
+            where: {location: 4, digit: 4},
+            order: [['round', 'DESC']],
+            include: [{
+                model: Game,
+                as: 'Games',
+                include: [{
+                  model: User,
+                  as: 'Player', // Ensure 'User' is the alias used in association in Game model
+                  attributes: ['username'] // Only fetch the 'username' attribute
+                }]
+              }],
+        })
+
+        const rounds = Object.values(round).map(entry => entry.dataValues);
+
+        const lessRound = rounds.map(round => {
+            return {
+                gameId: round.gameId,
+                round: round.round,
+                time: round.time,
+                player: round.Games.Player.username
             }
         })
 
-        // const flag = true;
-
-        // bookings.forEach(booking => {
-        //     if (start.getTime() <= booking.startDate.getTime() && booking.endDate.getTime() <= end.getTime()) {
-        //         flag = false;
-        //     } else if (booking.startDate.getTime() <= start.getTime() && booking.endDate.getTime() <= end.getTime()) {
-        //         flag = false;
-        //     } else if (booking.startDate.getTime() <= end.getTime() && end.getTime() <= booking.endDate.getTime()) {
-        //         flag = false;
-        //     } else if (booking.startDate.getTime() <= start.getTime() && start.getTime() <= booking.endDate.getTime()) {
-        //         flag = false;
-        //     }
-        // })
-        const checkDate = bookings.some(booking =>
-            start.getTime() <= booking.startDate.getTime() && booking.startDate.getTime() <= end.getTime() ||
-            booking.startDate.getTime() <= start.getTime() && end.getTime() <= booking.endDate.getTime() ||
-            start.getTime() <= booking.endDate.getTime() && booking.endDate.getTime() <= end.getTime() ||
-            start.getTime() <= booking.startDate.getTime() && booking.endDate.getTime() <= end.getTime()
-        )
-
-        if (!checkDate) {
-            const booking = await Booking.create({
-                spotId: req.params.spotId,
-                userId: req.user.id,
-                startDate, endDate,
-            })
-            return res.status(201).json(booking)
-        } else {
-            return res.status(403).json({
-                message: 'Sorry, this spot is already booked for the specified dates',
-                statusCode: 403,
-                errors: [
-                    "Start date conflicts with an existing booking",
-                    "End date conflicts with an existing booking"
-                ]
-            })
-        }
-        // } else if (start.getTime() === booking.startDate.getTime() || end.getTime() === booking.endDate.getTime()) {
-        //     return res.status(403).json({
-        //         message: 'Sorry, this spot is already booked for the specified dates',
-        //         statusCode: 403,
-        //         errors: [
-        //             "Start date conflicts with an existing booking",
-        //             "End date conflicts with an existing booking"
-        //         ]
-        //     })
-        // }
-        // else {
-        //     const booking = await Booking.create({
-        //         spotId: req.params.spotId,
-        //         userId: req.user.id,
-        //         startDate, endDate
-        //     })
-
-        //     return res.status(201).json(booking)
-        // }
+        return res.json(lessRound)
     }
 )
-
-// Delete a spot image
-// router.delete(
-//     '/spot-images/:spotImageId',
-//     async (req, res) => {
-//         const image = await Image.findOne({
-//             where: {
-//                 imageId: req.params.spotImageId,
-//                 imageType: "Spot"
-//             },
-//             include: {
-//                 model: Spot, where: { id: req.params.spotImageId }
-//             }
-//         });
-//         if (!image) {
-//             return res.status(404).json({
-//                 message: "Spot Image couldn't be found",
-//                 statusCode: 404
-//             })
-//         } else {
-//             await image.destroy();
-//             return res.status(200).json({
-//                 message: "Successfully deleted",
-//                 statusCode: 200
-//             })
-//         }
-//     }
-// )
-
-
 
 module.exports = router;

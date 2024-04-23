@@ -12,27 +12,27 @@ module.exports = {
       {
         userId: 1,
         difficulty: 1,
-        number: '1234'
+        number: '1234',
       },
       {
         userId: 2,
         difficulty: 2,
-        number: '1234'
+        number: '1234',
       },
       {
         userId: 3,
         difficulty: 1,
-        number: '1234'
+        number: '1234',
       },
       {
         userId: 5,
         difficulty: 2,
-        number: '1234'
+        number: '1234',
       },
       {
         userId: 4,
         difficulty: 3,
-        number: '1234'
+        number: '1234',
       },
     ])
   },
