@@ -97,17 +97,5 @@ router.get(
   }
 )
 
-// Delete a user
-router.delete(
-  '/:id',
-  async (req, res) => {
-    const user = await User.findByPk(req.params.id);
-    if (!user) {
-      res.status(404);
-      return res.json({ message: 'User not found' });
-    }
-    await user.destroy();
-    return res.status(200).json({ message: 'User successfully deleted' })
-  })
 
 module.exports = router;
