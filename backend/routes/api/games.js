@@ -1,24 +1,21 @@
 const express = require('express')
 const axios = require('axios');
+const session = require('express-session');
 const { Op } = require('sequelize')
 const { setTokenCookie, requireAuth, restoreUser } = require('../../utils/auth')
-const { Spot, User, Image, Review, Booking, sequelize } = require('../../db/models');
+const { Game, User, Guess, Score, sequelize } = require('../../db/models');
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
 const e = require('express');
 const router = express.Router();
 
-// const validateCreatebooking = [
-//     check('endDate')
-//         .exists()
-//         .isBefore('startDate')
-//         .withMessage('endDate cannot be on or before startDate'),
-//     check('endDate')
-//         .exists()
-//         .isAfter('startDate')
-//         .withMessage('startDate cannot be on or after endDate'),
-//     handleValidationErrors
-// ]
+
+router.use(session({
+    secret: 'bacon_pancake_bacon_pancake',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
 
 
 // Store the secret number
@@ -39,7 +36,7 @@ function checkGuess(guess, gameNumbers) {
     // Use arrays to keep track of numbers that have been successfully matched,
     // to ensure they aren't reused in the misplaced count.
     let remainingGuess = [];
-    let remainingSecret = [];
+    let remainingNumbers = [];
 
     // First pass: Check for correct numbers in the correct positions
     for (let i = 0; i < guess.length; i++) {
@@ -47,21 +44,19 @@ function checkGuess(guess, gameNumbers) {
             correct++;
         } else {
             remainingGuess.push(guess[i]);
-            remainingSecret.push(gameNumbers[i]);
+            remainingNumbers.push(gameNumbers[i]);
         }
     }
 
     // Second pass: Check for correct numbers in the wrong positions
     for (let digit of remainingGuess) {
-        const index = remainingSecret.indexOf(digit);
+        const index = remainingNumbers.indexOf(digit);
         if (index !== -1) {
             misplaced++;
-            remainingSecret.splice(index, 1); // Remove the matched element to prevent reuse
+            remainingNumbers.splice(index, 1); // Remove the matched element to prevent reuse
         }
     }
 
-    // console.log(remainingGuess)
-    // console.log(remainingSecret)
     return { correct, misplaced };
 }
 
@@ -70,6 +65,7 @@ function checkGuess(guess, gameNumbers) {
 router.post(
     '/random-Number',
     async (req, res) => {
+        const userId = req.user.id;
         const max = req.body.max ? parseInt(req.body.max, 10) : 7;
         const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
         // Check the difficulty of game and update the number for scores
@@ -93,20 +89,32 @@ router.post(
             }
         }
 
+
         // Game settings reset
         gameNumbers = numbers;
         rounds = 10;
         guessHistory = [];
         hint = false;
-        res.json(gameNumbers);
+
+        // Add new game to game database
+        const game = await Game.creategame({
+            userId, difficulty, number: numbers.join('')
+        });
+
+        req.session.gameId = game.id
+        console.log(req.session)
+        res.json(game);
     }
 )
-
 
 // Check the results
 router.post(
     '/result',
     async (req, res) => {
+        const userId = req.user.id;
+
+        const gameId = req.session.gameId;
+
         if (rounds <= 0) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
@@ -118,15 +126,27 @@ router.post(
         let times = guessHistory.length + 1;
         const result = checkGuess(userGuess, gameNumbers);
         guessHistory.push({ [times]: userGuess, result, rounds })
+
+        // Add guesses from current game to database
+        const guess = await Guess.create({
+            gameId,
+            number: userGuess.join(''),
+            correct: result.correct,
+            misplaced: result.misplaced,
+            round: rounds
+        });
+
         rounds--;
 
-        console.log(difficulty)
         if (Object.values(result)[0] === 4) {
             let score = rounds * difficulty * 100
+            const scores = await Score.create({
+                userId, numbers: score
+            })
             return res.json(`congrats! You won. The number is ${gameNumbers.join('')}. Your scor is ${score}!`)
-        }
+        };
 
-        return res.json({ result, rounds });
+        return res.json(guess);
     }
 )
 
@@ -134,7 +154,14 @@ router.post(
 router.get(
     '/history',
     async (req, res) => {
-        res.json({ history: guessHistory });
+        const gameId = req.session.gameId
+        const guesses = await Guess.findAll({
+            where: {
+                gameId: gameId
+            }
+        })
+        console.log(guesses)
+        res.json(guesses);
     }
 )
 
@@ -153,6 +180,7 @@ router.get(
         res.json({ hint: `The place of ${number + 1} number is ${gameNumbers[number]}.` });
     }
 )
+
 // Get all spots
 router.get(
     '/',

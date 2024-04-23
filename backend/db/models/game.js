@@ -9,6 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
+    static async creategame({ userId, difficulty, number }) {
+      const game = await Game.create({
+        userId,
+        difficulty,
+        number
+      });
+      return await Game.scope('currentGame').findByPk(game.id)
+    }
     static associate(models) {
       // define association here
       Game.belongsTo(models.User, { foreignKey: 'userId', as: 'Owner' })
@@ -31,6 +39,14 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Game',
+    defaultScope: {
+      attributes: { exclude: ['updatedAt'] }
+    },
+    scopes: {
+      currentGame: {
+        attributes: { exclude: ['updatedAt'] }
+      },
+    }
   });
   return Game;
 };
