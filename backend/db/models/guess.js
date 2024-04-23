@@ -9,13 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static async createguess({ gameId, number, correct, misplaced, round}) {
+    static async createguess({ gameId, number, location, digit, round, time}) {
       const guess = await Guess.create({
         gameId,
         number,
-        correct,
-        misplaced,
-        round
+        location,
+        digit,
+        round,
+        time
       });
       return await Guess.scope('defaultScope').findByPk(guess.id)
     }
@@ -33,17 +34,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    correct: {
+    location: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    misplaced: {
+    digit: {
       type: DataTypes.INTEGER,
       allowNull:false,
     },
     round: {
       type: DataTypes.INTEGER,
       allowNull:false,
+    },
+    time: {
+      type: DataTypes.INTEGER,
     },
   }, {
     sequelize,

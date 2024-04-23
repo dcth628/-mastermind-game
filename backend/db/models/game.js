@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     }
     static associate(models) {
       // define association here
-      Game.belongsTo(models.User, { foreignKey: 'userId', as: 'Owner' })
+      Game.belongsTo(models.User, { foreignKey: 'userId', as: 'Player' })
       Game.hasMany(models.Guess, {foreignKey: 'gameId', onDelete: "CASCADE", hooks: true})
     }
   }
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     number:{
       type: DataTypes.STRING,
       allowNull: false,
-    }
+    },
   }, {
     sequelize,
     modelName: 'Game',

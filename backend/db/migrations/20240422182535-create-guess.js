@@ -26,17 +26,20 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      correct: {
+      location: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      misplaced: {
+      digit: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
       round: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      time: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

@@ -11,45 +11,45 @@ module.exports = {
     options.tableName = 'Users';
     return queryInterface.bulkInsert(options, [
       {
-        email: 'demo@user.io',
-        username: 'Demo-lition',
-        firstName: 'Alex',
-        lastName: 'Cor',
+        email: 'emily@user.io',
+        username: 'EmilyT_2024',
+        firstName: 'Emily',
+        lastName: 'Thompson',
         hashedPassword: bcrypt.hashSync('password')
       },
       {
-        email: 'user1@user.io',
-        username: 'FakeUser1',
-        firstName: 'Doe',
-        lastName: 'Ple',
+        email: 'Lucas@user.io',
+        username: 'LucasM_88',
+        firstName: 'Lucas',
+        lastName: 'Martinez',
         hashedPassword: bcrypt.hashSync('password2')
       },
       {
-        email: 'user2@user.io',
-        username: 'FakerUser2',
-        firstName: 'Tien',
-        lastName: 'Kers',
+        email: 'Aisha@user.io',
+        username: 'AishaK_09',
+        firstName: 'Aisha',
+        lastName: 'Khan',
         hashedPassword: bcrypt.hashSync('password3')
       },
       {
-        email: 'user3@user.io',
-        username: 'FakerUser3',
-        firstName: 'Lase',
-        lastName: 'Psine',
+        email: 'David@user.io',
+        username: 'DaveLee_321',
+        firstName: 'David',
+        lastName: 'Lee',
         hashedPassword: bcrypt.hashSync('password4')
       },
       {
-        email: 'user4@user.io',
-        username: 'FakerUser4',
-        firstName: 'Nies',
-        lastName: 'Aeiens',
+        email: 'Sofia@user.io',
+        username: 'SofiaG_1995',
+        firstName: 'Sofia',
+        lastName: 'Garcia',
         hashedPassword: bcrypt.hashSync('password5')
       },
       {
-        email: 'user5@user.io',
-        username: 'FakerUser5',
-        firstName: 'Bseirs',
-        lastName: 'Wesefe',
+        email: 'Jordan@user.io',
+        username: 'JordanN_2023',
+        firstName: 'Jordan',
+        lastName: 'Nguyen',
         hashedPassword: bcrypt.hashSync('password6')
       },
     ])
