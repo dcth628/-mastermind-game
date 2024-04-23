@@ -299,7 +299,7 @@ router.get(
                 as: 'Games',
                 include: [{
                   model: User,
-                  as: 'Player', // Ensure 'User' is the alias used in association in Game model
+                  as: 'Player',
                   attributes: ['username'] // Only fetch the 'username' attribute
                 }]
               }],
@@ -312,7 +312,7 @@ router.get(
                 gameId: round.gameId,
                 round: round.round,
                 time: round.time,
-                player: round.Games.Player.username
+                player: round.Games.Player.username // Flattening the object {player: {username: abcde}} => {player: abcde}
             }
         })
 
