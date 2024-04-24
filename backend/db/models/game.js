@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Game.belongsTo(models.User, { foreignKey: 'userId', as: 'Player' })
-      Game.hasMany(models.Guess, {foreignKey: 'gameId', onDelete: "CASCADE", hooks: true})
+      Game.hasMany(models.Guess, {foreignKey: 'gameId'})
     }
   }
   Game.init({

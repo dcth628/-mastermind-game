@@ -1,7 +1,7 @@
 const express = require('express')
 const axios = require('axios');
 const session = require('express-session');
-const { Game, User, Guess, Score, sequelize } = require('../../db/models');
+const { Game, User, Guess, Score, Sequelize } = require('../../db/models');
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
 const router = express.Router();
@@ -111,8 +111,8 @@ router.post(
         if (rounds <= 0) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
-        const userGuessObject = req.body;
-        const userGuess = Object.values(userGuessObject).map(Number)
+        const userGuessObject = Object.values(req.body);
+        const userGuess = Object.values(userGuessObject[0]).map(Number)
         if (!userGuess || userGuess.length !== 4) {
             return res.status(400).json({ "error": "Invalid Guess" });
         }
@@ -138,7 +138,7 @@ router.post(
                 location: result.location,
                 digit: result.digit,
                 round: rounds,
-                tiem: time
+                time: 600
             });
             return res.json(`congrats! You won. The number is ${gameNumbers.join('')}. Your scor is ${score}!`)
         } else {
@@ -165,7 +165,6 @@ router.get(
                 gameId: gameId
             }
         })
-        console.log(guesses)
         res.json(guesses);
     }
 );
@@ -180,8 +179,6 @@ router.get(
         //
         const number = Math.floor(Math.random() * 4);
         hint = true;  // Set this to true so no further hints can be used
-
-        console.log(Math.random())
         res.json({ hint: `The place of ${number + 1} number is ${gameNumbers[number]}.` });
     }
 );
@@ -195,7 +192,6 @@ router.get(
         const scores = await Score.findAll({
             where: { userId: userId }
         });
-        console.log(scores)
 
         const totalScore = scores.reduce((acc, cur) => acc + cur.numbers, 0);
         const userName = req.user.username
@@ -239,6 +235,9 @@ router.get(
 
         const scoreRanking = Object.values(scoreList).sort((a, b) => b.numbers - a.numbers)
 
+        scoreRanking.forEach((score, index) => {
+            score.id = index + 1;  // Assign ID starting from 1
+        });
         return res.json(scoreRanking)
     }
 );
@@ -261,15 +260,28 @@ router.get(
     '/fast-time',
     async (req, res) => {
 
-        const time = await Game.findAll({
-            order: [['time', 'ASC']], // Assuming 'time' stores the duration in seconds or a similar unit
-            attributes: ['userId', 'time', 'difficulty'],
+        const time = await Guess.findAll({
+            where: {
+                time: {
+                    [Sequelize.Op.ne]: null
+                },
+                location: 4,
+                digit: 4
+            },
+            order: [['time', 'DESC']],
+            attributes: ['gameId', 'location', 'digit', 'time'],
             include: [{
-                model: User,
-                as: 'Player',
-                attributes: ['username']
+                model: Game,
+                as: 'Games',
+                attributes: ['number'],
+                include: [{
+                    model: User,
+                    as: 'Player',
+                    attributes: ['username'],
+                }]
             }]
         });
+
 
         const times = Object.values(time).map(entry => entry.dataValues);
 
@@ -277,9 +289,13 @@ router.get(
             return {
                 userId: time.userId,
                 time: time.time,
-                difficulty: time.difficulty,
-                Player: time.Player.username  // Flattening the object {player: {username: abcde}} => {player: abcde}
+                location: time.location,
+                digit: time.digit,
+                Player: time.Games.Player.username,  // Flattening the object {player: {username: abcde}} => {player: abcde}
             };
+        });
+        allTimes.forEach((score, index) => {
+            score.id = index + 1;  // Assign ID starting from 1
         });
 
         return res.json(allTimes)
@@ -293,7 +309,10 @@ router.get(
 
         const round = await Guess.findAll({
             where: {location: 4, digit: 4},
-            order: [['round', 'DESC']],
+            order: [['round', 'DESC'],
+                    ['time', 'DESC']
+                    ],
+            limit: 10,
             include: [{
                 model: Game,
                 as: 'Games',
@@ -315,6 +334,10 @@ router.get(
                 player: round.Games.Player.username // Flattening the object {player: {username: abcde}} => {player: abcde}
             }
         })
+
+        lessRound.forEach((score, index) => {
+            score.id = index + 1;  // Assign ID starting from 1
+        });
 
         return res.json(lessRound)
     }
