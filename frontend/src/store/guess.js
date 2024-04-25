@@ -1,11 +1,17 @@
 import { csrfFetch } from "./csrf";
 
 const LOAD_GUESS = 'guess/LOAD_GUESS';
+const GETALL_GUESS = 'guess/GETALL_GUESS'
 
 export const loadGuess = (history) => ({
     type: LOAD_GUESS,
     history,
 });
+
+export const loadAllGuess = (game) => ({
+    type: GETALL_GUESS,
+    game
+})
 
 export const loadGuessHistory = () => async dispatch => {
     const response = await csrfFetch('/api/games/history');
@@ -17,6 +23,16 @@ export const loadGuessHistory = () => async dispatch => {
     }
 };
 
+export const loadGameGuess = (game) => async dispatch => {
+    const response = await csrfFetch(`/api/games/${game}/guess`);
+
+    if (response.ok) {
+        const guess = await response.json();
+        dispatch(loadAllGuess(guess));
+        return guess;
+    };
+};
+
 const initialState = {}
 
 const guessReducer = (state = initialState, action) => {
@@ -24,13 +40,19 @@ const guessReducer = (state = initialState, action) => {
 
             case LOAD_GUESS:
                 const allGuess = {};
-                console.log(action)
                 action.history.forEach(history => {
                     allGuess[history.id] = history
                 });
                 return {
                     ...allGuess
                 };
+
+            case GETALL_GUESS:
+                const gameAllGuess = {};
+                action.game.forEach(game => {
+                    gameAllGuess[game.round] = game
+                })
+                return { ...gameAllGuess }
 
         default:
             return state;

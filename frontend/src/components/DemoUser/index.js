@@ -10,8 +10,8 @@ const DemoUserLogIn = () => {
     const dispatch = useDispatch();
     const history = useHistory();
     const { closeModal } = useModal()
-    const [ credential, setCredential] = useState("demo@user.io");
-    const [ password, setPassword ] = useState("password");
+    const [ credential, setCredential] = useState("john.smith@gmail.com");
+    const [ password, setPassword ] = useState("secret password");
 
     const demoUserLogin = async (e) => {
         e.preventDefault();

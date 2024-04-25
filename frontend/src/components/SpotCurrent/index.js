@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentSpot } from "../../store/spot";
+import { loadGameGuess } from "../../store/guess";
 import ConfirmDeleteSpotModal from "../ConfirmDeleteSpotModal";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
 import CreateSpotForm from "../SpotCreate";
@@ -16,6 +17,7 @@ const CurrentSpot = () => {
 
     useEffect(() => {
         dispatch(getCurrentSpot())
+        dispatch(loadGameGuess(306))
     }, [dispatch]);
 
 

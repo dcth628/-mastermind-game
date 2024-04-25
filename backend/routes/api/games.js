@@ -18,7 +18,7 @@ router.use(session({
 // Store the secret number
 let gameNumbers = [];
 // Store the remaining attempt
-let rounds = 10;
+let rounds = 1;
 // Set hint usage
 let hint = false;
 // Set Difficulty
@@ -87,7 +87,7 @@ router.post(
 
         // Game settings reset
         gameNumbers = numbers;
-        rounds = 10;
+        rounds = 1;
         hint = false;
 
         // Add new game to game database
@@ -108,7 +108,7 @@ router.post(
         const time = 600;
         const gameId = req.session.gameId;
 
-        if (rounds <= 0) {
+        if (rounds >= 10) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
         const userGuessObject = Object.values(req.body);
@@ -118,11 +118,8 @@ router.post(
         }
         const result = checkGuess(userGuess, gameNumbers);
 
-
-        rounds--;
-
         if (result.location === 4 && result.digit === 4) {
-            let score = (rounds + 1) * difficulty * 100
+            let score = (11 - rounds) * difficulty * 100
             // Add score to database
             const scores = await Score.create({
                 userId,
@@ -150,6 +147,7 @@ router.post(
                 digit: result.digit,
                 round: rounds
             });
+            rounds++;
             return res.json(guess);
         };
     }
@@ -176,10 +174,10 @@ router.get(
         if (hint) {
             return res.status(400).json({ error: "Hint already used." })
         }
-        //
+
         const number = Math.floor(Math.random() * 4);
         hint = true;  // Set this to true so no further hints can be used
-        res.json({ hint: `The place of ${number + 1} number is ${gameNumbers[number]}.` });
+        res.json({ index: number, number: gameNumbers[number] });
     }
 );
 
@@ -341,6 +339,20 @@ router.get(
 
         return res.json(lessRound)
     }
-)
+);
+
+router.get(
+    '/:gameId/guess',
+    async (req, res) => {
+
+        const gameGuess = await Guess.findAll({
+            where: {
+                gameId: req.params.gameId
+            },
+            attributes: ['gameId','number', 'location', 'digit', 'round', 'time' ]
+        })
+        return res.json(gameGuess)
+    }
+);
 
 module.exports = router;

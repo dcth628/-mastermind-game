@@ -4,12 +4,26 @@ import imageReducer from './image';
 import reviewReducer from './review';
 import sessionReducer from './session';
 import spotReducer from './spot';
+import checkReducer from './check';
+import gameReducer from './game';
+import guessReducer from './guess';
+import hintReducer from './hint';
+import roundReducer from './round';
+import scoreReducer from './score';
+import timeReducer from './time';
 
 const rootReducer = combineReducers({
     session: sessionReducer,
     spot: spotReducer,
     review: reviewReducer,
-    image: imageReducer
+    image: imageReducer,
+    check: checkReducer,
+    game: gameReducer,
+    guess: guessReducer,
+    hint: hintReducer,
+    round: roundReducer,
+    score: scoreReducer,
+    time: timeReducer
 });
 
 let enhancer;
