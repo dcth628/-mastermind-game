@@ -240,12 +240,14 @@ router.get(
     }
 );
 
-// Get all games
+// Get all games from current user
 router.get(
     '/all-game',
     async (req, res) => {
+        const userId = req.user.id;
 
         const games = await Game.findAll({
+            where: { userId: userId},
             attributes: ['id', 'userId', 'number', 'difficulty'],
         });
 
@@ -306,7 +308,7 @@ router.get(
     async (req, res) => {
 
         const round = await Guess.findAll({
-            where: {location: 4, digit: 4},
+            where: { location: 4, digit: 4 },
             order: [['round', 'DESC'],
                     ['time', 'DESC']
                     ],

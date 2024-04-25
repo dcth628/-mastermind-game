@@ -30,6 +30,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      solve: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

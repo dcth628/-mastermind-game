@@ -13,26 +13,31 @@ module.exports = {
         userId: 1,
         difficulty: 1,
         number: '1234',
+        solve: true
       },
       {
         userId: 2,
         difficulty: 2,
         number: '1234',
+        solve: true
       },
       {
         userId: 3,
         difficulty: 1,
         number: '1234',
+        solve: true
       },
       {
         userId: 5,
         difficulty: 2,
         number: '1234',
+        solve: true
       },
       {
         userId: 4,
         difficulty: 3,
         number: '1234',
+        solve: false
       },
     ])
   },
