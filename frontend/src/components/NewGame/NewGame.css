@@ -1,0 +1,51 @@
+.newGameContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    text-align: center;
+    padding: 20px;
+}
+.newGameContainer p {
+    font-size: 25px;
+}
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.button {
+    width: 250px;
+    height: 60px;
+    padding: 10px 20px;
+    border-radius: 70px;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 4px 4px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.easy {
+    background: #30e3ca;
+}
+
+.medium {
+    background: #57a6ff;
+}
+
+.hard {
+    background: #ff6b81;
+}
+
+.button:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button:active {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px);
+}

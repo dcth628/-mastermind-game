@@ -24,13 +24,11 @@ export const getAllGames = () => async dispatch => {
 };
 
 export const createNewGame = (game) => async dispatch => {
-    const { difficulty, number } = game;
     const response = await csrfFetch('/api/games/random-number', {
         method: 'POST',
-        // headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            difficulty,
-            number
+            max: game
         })
     });
 
@@ -54,13 +52,10 @@ const gameReducer = (state = initialState, action) => {
 
         case CREATE_GAME:
             if (!state[action.game.id]) {
-                const createdState = {
-                    ...state,
-                    [action.game.id]: action.game
-                };
+                console.log(action.game)
+                const createdState = action.game;
                 return createdState
             };
-            return {...state}
 
         default:
             return state;

@@ -1,0 +1,33 @@
+.sign-up-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background-color: #00A5C9;
+    border-radius: 40px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 824px;
+    height: 560px;
+}
+
+.sign-up-page h1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.sign-up-form {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    height: auto;
+}
+
+.signup {
+    color: #fff;
+    margin-bottom: 0px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}

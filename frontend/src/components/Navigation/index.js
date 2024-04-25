@@ -1,147 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-// import { NavLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import ProfileButton from './ProfileButton';
-import './Navigation.css';
-import CreateSpotForm from '../SpotCreate';
-// import Fab from '../Fab';import
-import OpenModalMenuItem from './OpenModalMenuItem';
-import airbnblogog from './airbnblogo.png'
+import React from 'react';
+import { NavLink } from 'react-router-dom'; // NavLink is used for navigation
+import './Navigation.css'; // Assuming you have a CSS file for styling
 
-function Navigation({ isLoaded }) {
-  const sessionUser = useSelector(state => state.session.user);
-  // const [showForm, setShowForm ] = useState(false);
-
-  const [showMenu, setShowMenu] = useState(false);
-  const ulRef = useRef();
-
-  // const openMenu = () => {
-  //   if (showMenu) return;
-  //   setShowMenu(true);
-  // };
-
-  useEffect(() => {
-    if (!showMenu) return;
-
-    const closeMenu = (e) => {
-      if (!ulRef.current.contains(e.target)) {
-        setShowMenu(false);
-      }
-    };
-
-    document.addEventListener('click', closeMenu);
-
-    return () => document.removeEventListener("click", closeMenu);
-  }, [showMenu]);
-
-  const closeMenu = () => setShowMenu(false);
-
+function Navigation() {
   return (
-    <div className='header'>
-      <>
-
-      <div className='header-home'>
-        <a href="/"><img className='home-logo' src={airbnblogog} alt={airbnblogog}></img> </a>
-      </div>
-      <div className='header-create-spot'>
-        { sessionUser ?
-        <div className='create-spot-link'>
-          <OpenModalMenuItem
-            itemText="Create New Spot"
-            onItemClick={closeMenu}
-            modalComponent={<CreateSpotForm />}
-          />
-        </div>
-        :
-        <></>
-        }
-      </div>
-      </>
-      {isLoaded && (
-        <div >
-          <ProfileButton user={sessionUser} />
-        </div>
-      )}
-    </div>
+    <nav className="navigation">
+      <NavLink className="nav-button" activeClassName="active" to="/newgame">Start a new game</NavLink>
+      <NavLink className="nav-button" activeClassName="active" to="/game-history">Game History</NavLink>
+      <NavLink className="nav-button" activeClassName="active" to="/leaderboard">Leaderboard</NavLink>
+      <NavLink className="nav-button" activeClassName="active" to="/rules">Rules</NavLink>
+      <NavLink className="nav-button" activeClassName="active" to="/logout">Log out</NavLink>
+    </nav>
   );
 }
 
 export default Navigation;
-
-// import React from 'react';
-// import { NavLink } from 'react-router-dom';
-// import { useSelector } from 'react-redux';
-// import ProfileButton from './ProfileButton';
-// import OpenModalButton from '../OpenModalButton';
-// import LoginFormModal from '../LoginFormModal/LoginFormModal';
-// // import * as sessionActions from '../../store/session';
-// import './Navigation.css';
-// import SignupFormModal from '../SignupFormModal/SignupFormModal';
-
-// const Navigation = ({isLoaded}) => {
-//     const sessionUser = useSelector(state => state.session.user);
-
-//     let sessionLinks;
-//     if (sessionUser) {
-//       sessionLinks = (
-//         <li>
-//           <ProfileButton user={sessionUser} />
-//         </li>
-//       );
-//     } else {
-//       sessionLinks = (
-//         <li>
-//           <OpenModalButton
-//           buttonText='Log In'
-//           modalComponent={<LoginFormModal />}
-//           />
-//           <OpenModalButton
-//           buttonText='Sign Up'
-//           modalComponent={<SignupFormModal />}
-//           />
-//         </li>
-//       );
-//     }
-//     // // const dispatch = useDispatch();
-
-//     // // const logout = (e) => {
-//     // //     e.preventDefault();
-//     // //     dispatch(sessionActions.logout());
-//     // // };
-
-//     // let sessionLinks;
-//     // if (sessionUser) {
-//     //   sessionLinks = (
-//     //     <li>
-//     //       <ProfileButton user={sessionUser} />
-//     //     </li>
-//     //   );
-//     // } else {
-//     //   sessionLinks = (
-//     //     <li>
-//     //       <NavLink to="/login">Log In</NavLink>
-//     //       <NavLink to="/signup">Sign Up</NavLink>
-//     //     </li>
-//     //   );
-//     // }
-
-//     // return (
-//     //   <ul>
-//     //     <li>
-//     //       <NavLink exact to="/">Home</NavLink>
-//     //     </li>
-//     //     {isLoaded && sessionLinks}
-//     //   </ul>
-//     // );
-
-//     return (
-//       <ul>
-//         <li>
-//           <NavLink exact to="/">Home</NavLink>
-//         </li>
-//         {isLoaded && sessionLinks}
-//       </ul>
-//     );
-// };
-
-// export default Navigation;

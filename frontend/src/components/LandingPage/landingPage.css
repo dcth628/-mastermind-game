@@ -1,0 +1,41 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+  font-family: 'Arial', sans-serif;
+}
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 520px;
+  width: 1000px;
+  background-color: #00A5C9;
+  border-radius: 40px;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  margin: auto auto;
+}
+
+.landing-page h1 {
+  margin-top: 0;
+  color: #ffffff;
+  font-size: 2em;
+  font-weight: bold;
+  padding-top: 30px;
+}
+
+.landing-button {
+  width: 60%;
+  cursor: pointer;
+  display: flex;
+  padding-top: 60px;
+  flex-direction: row;
+  justify-content: space-between;
+}
