@@ -1,9 +1,6 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import imageReducer from './image';
-import reviewReducer from './review';
 import sessionReducer from './session';
-import spotReducer from './spot';
 import checkReducer from './check';
 import gameReducer from './game';
 import guessReducer from './guess';
@@ -14,9 +11,6 @@ import timeReducer from './time';
 
 const rootReducer = combineReducers({
     session: sessionReducer,
-    spot: spotReducer,
-    review: reviewReducer,
-    image: imageReducer,
     check: checkReducer,
     game: gameReducer,
     guess: guessReducer,

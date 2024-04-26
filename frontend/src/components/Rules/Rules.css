@@ -1,0 +1,31 @@
+.game-rules {
+    background: #fcfeec;
+    padding: 10px 40px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.indicators {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.indicator {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    margin-top: 10px;
+    border: white 2px solid;
+}
+
+.green {
+    background-color: #38EA54;
+}
+
+.yellow {
+    background-color: #F9E006;
+}
