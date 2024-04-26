@@ -270,7 +270,8 @@ router.get(
                 location: 4,
                 digit: 4
             },
-            order: [['time', 'DESC']],
+            limit: 10,
+            order: [['time', 'ASC']],
             attributes: ['gameId', 'location', 'digit', 'time'],
             include: [{
                 model: Game,

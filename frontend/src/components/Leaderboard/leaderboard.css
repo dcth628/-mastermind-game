@@ -1,0 +1,48 @@
+.user-score {
+    text-align: center;
+    margin-top: 80px;
+}
+
+.leaderboard {
+    color: #333;
+    background-color: #f3f3f3;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.filter {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.filter button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    width: 100px;
+    border-radius: 10px;
+    cursor: pointer;
+    outline: none;
+    background-color: #C3B5FF;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, .1);
+}
+
+.filterActive {
+    background-color: #1a0d11;
+    color: white;
+}
+
+.ranking table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.ranking th,
+.ranking td {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
