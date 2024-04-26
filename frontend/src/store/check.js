@@ -8,11 +8,10 @@ export const createResult = (guess) => ({
 });
 
 export const checkResult = (guess) => async dispatch => {
+
     const response = await csrfFetch('/api/games/result', {
         method: 'POST',
-        body: JSON.stringify({
-            number: guess
-        })
+        body: JSON.stringify(guess)
     });
     const newGuess = await response.json();
     dispatch(createResult(newGuess));
