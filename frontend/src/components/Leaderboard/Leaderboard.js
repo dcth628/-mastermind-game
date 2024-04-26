@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllScores } from '../../store/score';
 import { getFewRound } from '../../store/round';
 import { getFastTime } from '../../store/time';
-import './Leaderboard.css'
+import './leaderboard.css'
 
 function Leaderboard() {
     const dispatch = useDispatch();
