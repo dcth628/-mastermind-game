@@ -1,0 +1,30 @@
+.game-page {
+    padding: 20px;
+    text-align: center;
+    width: 150vh;
+    height: 500px;
+}
+
+.game-history {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-top: 20px;
+}
+
+.game-history button {
+    border: none;
+}
+
+.game-card {
+    background-color: #00A5C9;
+    color: white;
+    padding: 20px;
+    border-radius: 40px;
+    width: 200px;
+    height: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    font-size: 18px;
+}

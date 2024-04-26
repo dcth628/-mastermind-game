@@ -24,7 +24,7 @@ function Navigation() {
   return (
     <nav className="navigation">
       <NavLink className="nav-button" activeClassName="active" to="/newgame">Start a new game</NavLink>
-      <NavLink className="nav-button" activeClassName="active" to="/game-history">Game History</NavLink>
+      <NavLink className="nav-button" activeClassName="active" to="/history">Game History</NavLink>
       <NavLink className="nav-button" activeClassName="active" to="/leaderboard">Leaderboard</NavLink>
       <NavLink className="nav-button" activeClassName="active" to="/rules">Rules</NavLink>
       <button className="nav-button" onClick={handleLogout} to="/logout">Log out</button>

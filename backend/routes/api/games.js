@@ -2,8 +2,6 @@ const express = require('express')
 const axios = require('axios');
 const session = require('express-session');
 const { Game, User, Guess, Score, Sequelize } = require('../../db/models');
-const { check } = require('express-validator');
-const { handleValidationErrors } = require('../../utils/validation');
 const router = express.Router();
 
 // Create a session middleware with the given
@@ -25,7 +23,7 @@ let hint = false;
 let difficulty = 1;
 
 function checkGuess(guess, gameNumbers) {
-    const result = {digit: 0, location: 0}
+    const result = { digit: 0, location: 0 }
     // First: Check the digit is on the correct index
     guess.forEach((num, index) => {
         if (num === gameNumbers[index]) {
@@ -61,13 +59,15 @@ router.post(
     '/random-Number',
     async (req, res) => {
         const userId = req.user.id;
-        const max = req.body.max ? parseInt(req.body.max, 10) : 7;
+        const max = req.body.max;
         const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
         // Check the difficulty of game and update the number for scores
         if (max === 8) {
             difficulty = 2;
         } else if (max === 9) {
             difficulty = 3;
+        } else {
+            difficulty = 1
         }
 
         let numbers = [];
@@ -105,14 +105,13 @@ router.post(
     '/result',
     async (req, res) => {
         const userId = req.user.id;
-        const time = 600;
         const gameId = req.session.gameId;
 
-        if (rounds >= 10) {
+        if (rounds > 10) {
             return res.status(400).json({ error: "No attempts left, start a new game." });
         }
         const userGuessObject = Object.values(req.body);
-        const userGuess = Object.values(userGuessObject[0]).map(Number)
+        const userGuess = Object.values(userGuessObject).map(Number)
         if (!userGuess || userGuess.length !== 4) {
             return res.status(400).json({ "error": "Invalid Guess" });
         }
@@ -121,23 +120,26 @@ router.post(
         if (result.location === 4 && result.digit === 4) {
             let score = (11 - rounds) * difficulty * 100
             // Add score to database
-            const scores = await Score.create({
+           await Score.create({
                 userId,
                 numbers: score
             })
-            // Add new game to game database
-            const game = await Game.creategame({
-                userId, difficulty, number: userGuess.join(''), time
-            });
+            // Add guess from current game to database
             const guess = await Guess.createguess({
                 gameId,
                 number: userGuess.join(''),
                 location: result.location,
                 digit: result.digit,
                 round: rounds,
-                time: 600
             });
-            return res.json(`congrats! You won. The number is ${gameNumbers.join('')}. Your scor is ${score}!`)
+            return res.json({
+                id: guess.id,
+                location: result.location,
+                digit: result.digit,
+                gameNumber: gameNumbers.join(''),
+                score: score,
+                time: guess.time
+            })
         } else {
             // Add guesses from current game to database
             const guess = await Guess.createguess({
@@ -247,8 +249,8 @@ router.get(
         const userId = req.user.id;
 
         const games = await Game.findAll({
-            where: { userId: userId},
-            attributes: ['id', 'userId', 'number', 'difficulty'],
+            where: { userId: userId },
+            attributes: ['id', 'userId', 'number', 'difficulty', 'solve', 'createdAt'],
         });
 
         return res.json(games)
@@ -309,19 +311,19 @@ router.get(
 
         const round = await Guess.findAll({
             where: { location: 4, digit: 4 },
-            order: [['round', 'DESC'],
-                    ['time', 'DESC']
-                    ],
+            order: [['round', 'ASC'],
+            ['time', 'DESC']
+            ],
             limit: 10,
             include: [{
                 model: Game,
                 as: 'Games',
                 include: [{
-                  model: User,
-                  as: 'Player',
-                  attributes: ['username'] // Only fetch the 'username' attribute
+                    model: User,
+                    as: 'Player',
+                    attributes: ['username'] // Only fetch the 'username' attribute
                 }]
-              }],
+            }],
         })
 
         const rounds = Object.values(round).map(entry => entry.dataValues);
@@ -351,10 +353,33 @@ router.get(
             where: {
                 gameId: req.params.gameId
             },
-            attributes: ['gameId','number', 'location', 'digit', 'round', 'time' ]
+            attributes: ['gameId', 'number', 'location', 'digit', 'round', 'time']
         })
         return res.json(gameGuess)
     }
 );
+
+router.put(
+    '/win',
+    async (req, res) => {
+        const gameId = req.session.gameId;
+        const solve = req.body.game
+        const game = await Game.findByPk(gameId);
+        game.solve = solve;
+        await game.save();
+        res.json(game)
+    }
+)
+
+router.put(
+    '/win-guess',
+    async (req, res) => {
+        const {id, time}= req.body;
+        const guess = await Guess.findByPk(id);
+        guess.time = time;
+        await guess.save();
+        res.json(guess);
+    }
+)
 
 module.exports = router;

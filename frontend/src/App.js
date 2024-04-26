@@ -15,6 +15,8 @@ import LoginForm from "./components/LoginForm/LoginForm";
 import SignupForm from "./components/SignupForm/SignupForm";
 import NewGame from "./components/NewGame/NewGame";
 import GamePage from "./components/GamePage/GamePage";
+import GameHistory from "./components/GameHistory/GameHistory";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -47,8 +49,8 @@ function App() {
         <Route exact path='/gamepage'>
           <GamePage />
         </Route>
-        <Route path='/spots/new'>
-          <CreateSpotForm />
+        <Route path='/history'>
+          <GameHistory />
         </Route>
         <Route path='/spots/:spotId/edit'>
           <EditSpotForm />
