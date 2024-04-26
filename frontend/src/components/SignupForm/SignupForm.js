@@ -34,7 +34,7 @@ function SignupForm() {
   const demoUserLogin = async (e) => {
     e.preventDefault();
     return dispatch(sessionActions.login(
-      {"credential":'john.smith@gmail.com', "password":'secret password'}))
+      {"credential":'demo@user.io', "password":'password6'}))
       .then(history.push('/newgame'))
   };
 
