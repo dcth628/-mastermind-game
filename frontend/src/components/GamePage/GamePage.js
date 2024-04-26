@@ -11,6 +11,7 @@ const GamePage = () => {
     const dispatch = useDispatch();
     const history = useHistory();
     const difficulty = useSelector((state) => state?.game.difficulty)
+    const gameNumber = useSelector((state) => state?.game.number)
     const [time, setTime] = useState(0);
     const [inputValues, setInputValues] = useState({ 1: '', 2: '', 3: '', 4: '' });
     const [guess, setGuess] = useState([]);
@@ -176,7 +177,7 @@ const GamePage = () => {
                     <h2 style={{
                         marginTop: '50px',
                         fontSize: '20px',
-                        }}>Whoops!<br></br>
+                        }}>Whoops! The number is {gameNumber}<br></br>
                         You've hit the 10-try limit this round. Restart and try again!<br></br>
                         You're getting better with every game.🌟
                     </h2>

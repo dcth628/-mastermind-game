@@ -17,6 +17,7 @@ import NewGame from "./components/NewGame/NewGame";
 import GamePage from "./components/GamePage/GamePage";
 import GameHistory from "./components/GameHistory/GameHistory";
 import Leaderboard from "./components/Leaderboard/Leaderboard";
+import Rules from "./components/Rules/Rules";
 
 function App() {
   const dispatch = useDispatch();
@@ -55,8 +56,8 @@ function App() {
         <Route path='/leaderboard'>
           <Leaderboard />
         </Route>
-        <Route path='/reviews/:reviewId/edit'>
-          <EditReviewForm />
+        <Route path='/rules'>
+          <Rules />
         </Route>
         <Route path='/:spotId/reviews'>
           <CreateReviewFrom />
