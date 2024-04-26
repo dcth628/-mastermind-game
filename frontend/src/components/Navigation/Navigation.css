@@ -15,7 +15,7 @@
     justify-content: center;
     width: 150px;
     height: 36px;
-    margin: 10px 0px;
+    margin: 10px px;
     text-decoration: none;
     background-color: #ff69b4;
     color: white;
@@ -34,4 +34,19 @@
 
 .active {
     background-color: #c71585;
+}
+
+.navigation button.nav-button {
+    width: 190px;
+    height: 56px;
+    margin: 10px px;
+    text-decoration: none;
+    background-color: #ff69b4;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, .1);
+    cursor: pointer;
 }

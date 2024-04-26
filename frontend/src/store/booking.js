@@ -23,7 +23,6 @@ const bookingReduce = (state = initialState, action) => {
     switch (action.type) {
         case LOAD_BOOKING:
             const allBookings = {};
-            console.log(action)
 
         default:
             return state;
