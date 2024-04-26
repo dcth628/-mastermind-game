@@ -16,7 +16,7 @@ import SignupForm from "./components/SignupForm/SignupForm";
 import NewGame from "./components/NewGame/NewGame";
 import GamePage from "./components/GamePage/GamePage";
 import GameHistory from "./components/GameHistory/GameHistory";
-
+import Leaderboard from "./components/Leaderboard/Leaderboard";
 
 function App() {
   const dispatch = useDispatch();
@@ -52,8 +52,8 @@ function App() {
         <Route path='/history'>
           <GameHistory />
         </Route>
-        <Route path='/spots/:spotId/edit'>
-          <EditSpotForm />
+        <Route path='/leaderboard'>
+          <Leaderboard />
         </Route>
         <Route path='/reviews/:reviewId/edit'>
           <EditReviewForm />
