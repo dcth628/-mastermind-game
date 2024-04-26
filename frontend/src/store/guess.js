@@ -29,8 +29,8 @@ export const loadGuessHistory = () => async dispatch => {
     }
 };
 
-export const loadGameGuess = (game) => async dispatch => {
-    const response = await csrfFetch(`/api/games/${game}/guess`);
+export const loadGameGuess = (gameId) => async dispatch => {
+    const response = await csrfFetch(`/api/games/${gameId}/guess`);
 
     if (response.ok) {
         const guess = await response.json();

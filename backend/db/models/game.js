@@ -9,11 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static async creategame({ userId, difficulty, number }) {
+    static async creategame({ userId, difficulty, number, solve }) {
       const game = await Game.create({
         userId,
         difficulty,
-        number
+        number,
+        solve
       });
       return await Game.scope('currentGame').findByPk(game.id)
     }
