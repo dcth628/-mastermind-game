@@ -22,6 +22,27 @@ const GamePage = () => {
     const [winMessage, setWinMessage] = useState();
     const [timerId, setTimerId] = useState(null);
 
+    const maxInputByDifficulty = () => {
+        switch (difficulty) {
+            case 1: // Easy
+                return 7;
+            case 2: // Medium
+                return 8;
+        }
+    };
+
+    const isSubmitDisabled = () => {
+        // Check for any errors first
+        if (errors) return true;
+
+        const maxInput = maxInputByDifficulty();
+        return Object.values(inputValues).some(value => {
+            const num = Number(value);
+            return value === '' || num < 0 || num > maxInput;
+        });
+    };
+
+
     // Set input values and input validations
     const handleInputChange = (index, value) => {
         const inputNum = Number(value);
@@ -244,7 +265,7 @@ const GamePage = () => {
                             </div>
                         ))}
                     </div>
-                    <button className='submitBtn' onClick={handleSubmit}>
+                    <button className='submitBtn'  disabled={isSubmitDisabled()}  onClick={handleSubmit}>
                         Submit
                     </button>
                     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

@@ -21,20 +21,11 @@ function Leaderboard() {
 
     const [filter, setFilter] = useState('score');
 
-    const getActiveData = () => {
-      switch (filter) {
-        case 'score':
-          return scoreData;
-        case 'time':
-          return timeData;
-        case 'round':
-          return roundData;
-        default:
-          return [];
-      }
+    const formatTime = (time) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
-
-    const data = getActiveData()
 
 
     useEffect(() => {
@@ -82,7 +73,7 @@ function Leaderboard() {
                             <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{time.Player}</td>
-                            <td>{time.time}</td>
+                            <td>{formatTime(time.time)}</td>
                         </tr>
                         )): <></>}
                         {filter === 'round' ? roundData.map((round, index) => (
