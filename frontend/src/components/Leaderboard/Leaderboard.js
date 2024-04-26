@@ -17,7 +17,7 @@ function Leaderboard() {
     const roundData = Object.values(round);
 
     const userData = scoreData.find(data => data.userId === userId)
-    const scores = userData.numbers;
+    const scores = userData?.numbers;
 
     const [filter, setFilter] = useState('score');
 
@@ -45,7 +45,7 @@ function Leaderboard() {
 
     return (
         <>
-         <h1 className='user-score'>Your score is {scores}!!</h1>
+         <h1 className='user-score'>Your score is {scores ? scores : 0}!!</h1>
         <div className="leaderboard">
             <div className="filter">
                 <button activeClassName='filterActive'
