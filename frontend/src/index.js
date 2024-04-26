@@ -8,8 +8,6 @@ import { BrowserRouter } from 'react-router-dom';
 import configureStore from './store';
 import { restoreCSRF, csrfFetch } from './store/csrf';
 import * as sessionActions from './store/session';
-import * as spotActions from './store/spot';
-import * as reviewActions from './store/review';
 import * as checkActions from './store/check';
 import * as gameActions from './store/game';
 import * as guessActions from './store/guess';
@@ -25,9 +23,7 @@ const store = configureStore();
 if (process.env.NODE_ENV !== 'production') {
   restoreCSRF();
 
-  window.spotActions = spotActions;
   window.sessionActions = sessionActions;
-  window.reviewActions = reviewActions;
   window.checkActions = checkActions;
   window.gameActions = gameActions;
   window.guessActions = guessActions;

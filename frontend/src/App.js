@@ -3,13 +3,6 @@ import { useDispatch } from "react-redux";
 import { Switch, Route, useLocation } from "react-router-dom";
 import * as sessionActions from "./store/session";
 import Navigation from "./components/Navigation";
-import AllSpots from "./components/SpotsAll";
-import SpotDetails from "./components/SpotDetails";
-import CreateSpotForm from "./components/SpotCreate";
-import EditSpotForm from "./components/SpotEdit";
-import EditReviewForm from "./components/ReviewEdit";
-import CreateReviewFrom from "./components/ReviewCreate";
-import CurrentSpot from "./components/SpotCurrent";
 import LoadingPage from "./components/LandingPage/landingPage";
 import LoginForm from "./components/LoginForm/LoginForm";
 import SignupForm from "./components/SignupForm/SignupForm";
@@ -41,9 +34,6 @@ function App() {
         <Route exact path="/signup">
           <SignupForm />
         </Route>
-        <Route exact path="/allspot">
-          <AllSpots />
-        </Route>
         <Route exact path='/newgame'>
           <NewGame />
         </Route>
@@ -58,9 +48,6 @@ function App() {
         </Route>
         <Route path='/rules'>
           <Rules />
-        </Route>
-        <Route path='/:spotId/reviews'>
-          <CreateReviewFrom />
         </Route>
       </Switch>
     </>

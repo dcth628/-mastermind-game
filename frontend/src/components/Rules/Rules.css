@@ -1,7 +1,6 @@
 .game-rules {
-    background: #f6f6f6;
-    /* light gray background */
-    padding: 20px;
+    background: #fcfeec;
+    padding: 10px 40px;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -20,6 +19,7 @@
     display: inline-block;
     margin-right: 5px;
     margin-top: 10px;
+    border: white 2px solid;
 }
 
 .green {
