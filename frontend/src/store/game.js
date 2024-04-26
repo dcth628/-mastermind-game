@@ -44,10 +44,9 @@ export const createNewGame = (game) => async dispatch => {
 };
 
 export const updateWinGame = (game) => async dispatch => {
-    console.log(game, '----game in update')
     const response = await csrfFetch('/api/games/win', {
         method: 'PUT',
-        // headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             game
         })
@@ -55,7 +54,6 @@ export const updateWinGame = (game) => async dispatch => {
 
     const winGame = await response.json();
     dispatch(update(winGame));
-    console.log(winGame)
     return winGame
 }
 
@@ -74,14 +72,12 @@ const gameReducer = (state = initialState, action) => {
 
         case CREATE_GAME:
             if (!state[action.game.id]) {
-                console.log(action.game)
                 const createdState = action.game;
                 return createdState
             };
 
         case UPDATE_GAME:
             if (!state[action.game.id]) {
-                console.log(action.game)
                 const createdState = action.game;
                 return createdState
             };

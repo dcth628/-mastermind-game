@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { checkResult } from '../../store/check';
 import { getHint } from '../../store/hint';
 import { updateWinGame } from '../../store/game';
+import { updateWinGuess } from '../../store/guess';
 import './GamePage.css';
 
 const GamePage = () => {
@@ -20,7 +21,6 @@ const GamePage = () => {
     const [winMessage, setWinMessage] = useState();
     const [timerId, setTimerId] = useState(null);
 
-    console.log(guess.length)
     // Set input values and input validations
     const handleInputChange = (index, value) => {
         const inputNum = Number(value);
@@ -43,9 +43,12 @@ const GamePage = () => {
         if (guess.length < 10) {
             const guesses = [...guess, Object.values(inputs)];
             setGuess(guesses);
-            let check = await dispatch(checkResult(inputs))
+            let check = await dispatch(checkResult(inputs));
+
+            const id = check.id;
             if (check.location === 4 && check.digit === 4) {
                 await dispatch(updateWinGame(true));
+                await dispatch(updateWinGuess({id, time}))
                 setIsModalOpen(true);
                 setWinMessage(check);
                 clearInterval(timerId)

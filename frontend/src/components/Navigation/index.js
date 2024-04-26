@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import { NavLink } from 'react-router-dom';
@@ -8,11 +8,18 @@ import './Navigation.css';
 function Navigation() {
   const dispatch = useDispatch();
   const history = useHistory();
+  const [time, setTime] = useState(0);
+  const [timerId, setTimerId] = useState(null);
+
   const handleLogout = (e) => {
     e.preventDefault();
     dispatch(logout());
     history.push('/')
   };
+
+  useEffect(() => {
+        setTime(0);
+}, [dispatch]);
 
   return (
     <nav className="navigation">

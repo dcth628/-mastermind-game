@@ -2,6 +2,7 @@ import { csrfFetch } from "./csrf";
 
 const LOAD_GUESS = 'guess/LOAD_GUESS';
 const GETALL_GUESS = 'guess/GETALL_GUESS'
+const UPDATE_GUESS = 'guess/UPDATE_GUESS'
 
 export const loadGuess = (history) => ({
     type: LOAD_GUESS,
@@ -11,6 +12,11 @@ export const loadGuess = (history) => ({
 export const loadAllGuess = (game) => ({
     type: GETALL_GUESS,
     game
+});
+
+export const update = (guess) => ({
+    type: UPDATE_GUESS,
+    guess
 })
 
 export const loadGuessHistory = () => async dispatch => {
@@ -33,6 +39,22 @@ export const loadGameGuess = (game) => async dispatch => {
     };
 };
 
+export const updateWinGuess = (guess) => async dispatch => {
+    const {id , time} = guess;
+    const response = await csrfFetch('/api/games/win-guess', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id,
+            time
+        })
+    });
+
+    const winGameGuess = await response.json();
+    dispatch(update(winGameGuess));
+    return winGameGuess
+};
+
 const initialState = {}
 
 const guessReducer = (state = initialState, action) => {
@@ -53,6 +75,12 @@ const guessReducer = (state = initialState, action) => {
                     gameAllGuess[game.round] = game
                 })
                 return { ...gameAllGuess }
+
+            case UPDATE_GUESS:
+                if (!state[action.guess.id]) {
+                    const createdState = action.guess;
+                    return createdState
+                }
 
         default:
             return state;
