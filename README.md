@@ -9,31 +9,35 @@
  > `Quad Cipher is a game in which you need to guess a number combination. You can choose from different difficulty levels and save your score. Your score and time might even show up on the leaderboard! You can also review your game history to improve your skills for the next game. Enjoy playing the game!!`
 
  > `The source code is open so that you can download the source code and set it up with ease if you would like to play this game locally`
+
+* [Live Site](https://quad-cipher.onrender.com/)
+  
 <br/>
 
 ## 📋 Table of Contents
 
-01. ⭐ [App Gif Demo](#app-gif)
+01. ⭐ [App Demo](#app-gif)
 02. 🃏 [App Screenshot](#app-screenshot)
 03. 🔨 [Folder Structure](#folder-structure)
 04. 🌿 [Figma Prototype](#figma-prototype)
 05. 🚀 [developing](#developing)
 06. 🐳 [Getting Start](#getting-started)
 07. 📈 [API Documentation](#api-documentation)
-08. 📈 [API Documentation](#api-documentation)
-09. 🐙 [Database Schema](#database-schema)
-10. ✨ [Feature List](#feature-list)
+08. 🐙 [Database Schema](#database-schema)
+09. ✨ [Feature List](#feature-list)
 
 <br/>
 
-## ⭐ <a name='app-gif'> App Gif Demo</a>
-![game demonstrate]( git )
+## ⭐ <a name='app-gif'> App Demo</a>
+
+https://github.com/dcth628/mastermind-game/assets/109315871/2692c799-3a4a-4e3e-8b9f-6db5b90134c5
+
 
 ## 🃏 <a name='app-screenshot'>App Screenshots</a>
 
 |                                                                                    Game Login                                                                                     |                                                                                   Start a new game                                                                                   |                                                                                Check game history                                                                                |                                                                             Leaderboard                                                                              |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="placeholder 1" title="Game Login " width="100%" crossorigin> | <img src="placerholder 2" title="start a new game" width="100%" crossorigin> | <img src="placerholder 3" title="check game history" width="100%" crossorigin> | <img src="placeholder 4" title="leaderboard" width="100%" crossorigin> |
+| <img src="https://res.cloudinary.com/ddxewbhmy/image/upload/v1714187117/Screen_Recording_2024-04-26_at_20.03.47_zzzgem.gif" title="Game Login " width="220px" crossorigin> | <img src="https://res.cloudinary.com/ddxewbhmy/image/upload/v1714187424/Screen_Recording_2024-04-26_at_20.09.04_t1ybi0.gif" title="start a new game" width="220px" crossorigin> | <img src="https://res.cloudinary.com/ddxewbhmy/image/upload/v1714187522/Screen_Recording_2024-04-26_at_20.10.05_uqpfhs.gif" title="check game history" width="220px" crossorigin> | <img src="https://res.cloudinary.com/ddxewbhmy/image/upload/v1714187582/Screen_Recording_2024-04-26_at_20.11.33_s032ww.gif" title="leaderboard" width="220px" crossorigin> |
 
 <br/>
 
@@ -67,7 +71,7 @@
 <br/>
 
 ## 🌿 <a name='figma-prototype'>Figma Prototype</a>
-[![Quad cipher prototype](gif for prototype)](https://www.figma.com/proto/x8fBopteu4Z7zmK4xoMoCW/Mastermind-Game?node-id=1-2&mode=design&t=nT6FbUJyeMgYahrJ-1)
+[![Quad cipher prototype](https://res.cloudinary.com/ddxewbhmy/image/upload/v1714189072/Screenshot_2024-04-26_at_20.37.12_cukeg8.png)](https://www.figma.com/proto/x8fBopteu4Z7zmK4xoMoCW/Mastermind-Game?node-id=8-146&scaling=scale-down&mode=design&t=701cXv3plUqCCqnR-1)
 
 ## 🚀 <a name='developing'>Developing</a>
 
@@ -193,8 +197,6 @@ Guess table has attribute `gameId` associate with game table, `number` to store 
 <br/>
 
 ## ✨ <a name='feature-list'>Feature List</a>
-
-### MVP List
 
 #### 1. New account creation, log in, log out, and guest/demo login
 
