@@ -9,6 +9,7 @@
     align-items: center;
   }
 
+
   #modal-background {
     position: fixed;
     top: 0;
@@ -17,6 +18,7 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
   }
+
 
   #modal-content {
     position: absolute;
