@@ -109,6 +109,18 @@ const LoginForm = () => {
                     Log in as a <button onClick={demoUserLogin} >Demo User</button>
                 </div>
             </form>
+            <div className="footer">
+				<div>
+					<a href='https://github.com/dcth628/' target="_blank"  rel="noreferrer">
+						<i className='fab fa-github'></i>
+					</a>
+					<a href='https://www.linkedin.com/in/deanhsieh/' target="_blank"  rel="noreferrer">
+						<i className='fab fa-linkedin-in'></i>
+					</a>
+				</div>
+				<div>Term of Use ・ Privacy Policy</div>
+				<p>&copy; 2024 Copyright Dean Hsieh </p>
+			</div>
         </>
 
     );
