@@ -164,7 +164,7 @@ const GamePage = () => {
             <div className='gamepage'>
                 <div className='game-control'>
                     <div>
-                        <button className={`button ${getDifficultyClass(difficulty)}`}>
+                        <button className={`button ${getDifficultyClass(difficulty)}`} disabled='true'>
                             {getDifficultyButton(difficulty)}
                         </button>
                     </div>
