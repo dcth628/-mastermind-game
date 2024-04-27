@@ -37,10 +37,10 @@ const GamePage = () => {
         if (errors) return true;
 
         const maxInput = maxInputByDifficulty();
-        return Object.values(inputValues).some(value => {
+        return (Object.values(inputValues).some(value => {
             const num = Number(value);
             return value === '' || num < 0 || num > maxInput;
-        });
+        })&& guess.length > 9 );
     };
 
 
@@ -56,25 +56,19 @@ const GamePage = () => {
     };
 
     const handleKeyDown = (event, callback) => {
+        if (guess.length > 9) {
+            event.preventDefault();
+            return;
+        }
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the default form submit action
-            callback(event); // Call the handleSubmit function
+            event.preventDefault();
+            callback(event);
         }
     };
 
-    // Submit the input to get check result
-    const handleSubmit = async (e) => {
-        // e.preventDefault();
-        const inputs = await Object.entries(inputValues).reduce((newObj, [key, value]) => {
-            newObj[key] = Number(value);
-            return newObj;
-        }, {});
-        if (guess.length < 10) {
-            const guesses = [...guess, Object.values(inputs)];
-            setGuess(guesses);
-            let check = await dispatch(checkResult(inputs));
-
-            const id = check.id;
+    // Check function to update the game and guess
+    const gameCheck = async (check) => {
+        const id = check.id;
             if (check.location === 4 && check.digit === 4) {
                 await dispatch(updateWinGame(true));
                 await dispatch(updateWinGuess({id, time}))
@@ -84,9 +78,26 @@ const GamePage = () => {
             }
             let newCheck = [...result, check]
             await setResult(newCheck)
-        } else if (guess.length >= 10) {
-            setIsModalOpen(true);
-        }
+    }
+
+    // Submit the input to get check result
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const inputs = await Object.entries(inputValues).reduce((newObj, [key, value]) => {
+            newObj[key] = Number(value);
+            return newObj;
+        }, {});
+        const guesses = [...guess, Object.values(inputs)];
+
+        setGuess(guesses);
+        if (guesses.length <= 10) {
+            let check = await dispatch(checkResult(inputs));
+            await gameCheck(check)
+
+            if (guesses.length === 10) {
+                setIsModalOpen(true);
+            }
+        };
         setInputValues({
             1: '',
             2: '',
