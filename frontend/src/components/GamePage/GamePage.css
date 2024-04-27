@@ -169,10 +169,11 @@
 }
 .result-tab {
   width: 350px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom:9px;
+  margin-bottom:6px;
   background-color: #90F1EB;
   border-radius: 40px;
   padding: 3px;
