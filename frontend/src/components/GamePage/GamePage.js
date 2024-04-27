@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { checkResult } from '../../store/check';
 import { getHint } from '../../store/hint';
 import { updateWinGame } from '../../store/game';
@@ -10,7 +9,6 @@ import './GamePage.css';
 
 const GamePage = () => {
     const dispatch = useDispatch();
-    const history = useHistory();
     const firstInputRef = useRef(null);
     const difficulty = useSelector((state) => state?.game.difficulty)
     const gameNumber = useSelector((state) => state?.game.number)
@@ -60,6 +58,10 @@ const GamePage = () => {
 
     const handleKeyDown = (event, callback) => {
         if (guess.length > 9) {
+            event.preventDefault();
+            return;
+        };
+        if (winMessage) {
             event.preventDefault();
             return;
         };
