@@ -5,7 +5,7 @@ import { checkResult } from '../../store/check';
 import { getHint } from '../../store/hint';
 import { updateWinGame } from '../../store/game';
 import { updateWinGuess } from '../../store/guess';
-// import Modal from '../Navigation/OpenModalMenu';
+import Modal from '../Navigation/OpenModalMenu';
 import './GamePage.css';
 
 const GamePage = () => {
