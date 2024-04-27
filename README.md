@@ -176,7 +176,7 @@ Run `React frontend serve` for a dev server. Navigate to `http://localhost:3000/
 | Update Guess when Win        | /api/games/win-guess                       | -           |
 
 Please see more details in API routes document.
-### [API routes document](https://github.com/dcth628/API-Project/wiki/API-Routes)
+### [API routes document]([https://github.com/dcth628/API-Project/wiki/API-Routes](https://github.com/dcth628/mastermind-game/wiki/API-Routes))
 
 <br/>
 
