@@ -47,8 +47,10 @@ const LoginForm = () => {
                     <TextField id="outlined-basic"
                         label="Username or Email"
                         variant="outlined"
+                        type="email"
                         value={credential}
                         onChange={(e) => setCredential(e.target.value)}
+                        required
                         sx={{
                             width: '510px',
                             '& .MuiOutlinedInput-root': {
@@ -70,6 +72,7 @@ const LoginForm = () => {
                         type="password"
                         autoComplete="current-password"
                         value={password}
+                        required
                         onChange={(e) => setPassword(e.target.value)}
                         sx={{
                             width: '510px',

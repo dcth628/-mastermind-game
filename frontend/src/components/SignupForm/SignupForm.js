@@ -56,6 +56,8 @@ function SignupForm() {
             label="Email"
             variant="outlined"
             value={email}
+            type="email"
+            required
             onChange={(e) => setEmail(e.target.value)}
             sx={{
               width: '510px',
@@ -76,6 +78,7 @@ function SignupForm() {
             label="Username"
             variant="outlined"
             value={username}
+            required
             onChange={(e) => setUsername(e.target.value)}
             sx={{
               width: '510px',
@@ -96,6 +99,7 @@ function SignupForm() {
             label="First Name"
             variant="outlined"
             value={firstName}
+            required
             onChange={(e) => setFirstName(e.target.value)}
             sx={{
               width: '510px',
@@ -116,6 +120,7 @@ function SignupForm() {
             label="Last Name"
             variant="outlined"
             value={lastName}
+            required
             onChange={(e) => setLastName(e.target.value)}
             sx={{
               width: '510px',
@@ -138,6 +143,7 @@ function SignupForm() {
             type="password"
             autoComplete="current-password"
             value={password}
+            required
             onChange={(e) => setPassword(e.target.value)}
             sx={{
               width: '510px',
@@ -159,6 +165,7 @@ function SignupForm() {
             type="password"
             autoComplete="current-password"
             value={confirmPassword}
+            required
             onChange={(e) => setConfirmPassword(e.target.value)}
             sx={{
               width: '510px',

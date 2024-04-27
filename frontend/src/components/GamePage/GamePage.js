@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { checkResult } from '../../store/check';
@@ -10,6 +10,7 @@ import './GamePage.css';
 const GamePage = () => {
     const dispatch = useDispatch();
     const history = useHistory();
+    const firstInputRef = useRef(null);
     const difficulty = useSelector((state) => state?.game.difficulty)
     const gameNumber = useSelector((state) => state?.game.number)
     const [time, setTime] = useState(0);
@@ -54,10 +55,16 @@ const GamePage = () => {
         setInputValues({ ...inputValues, [index]: value });
     };
 
+    const handleKeyDown = (event, callback) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default form submit action
+            callback(event); // Call the handleSubmit function
+        }
+    };
+
     // Submit the input to get check result
     const handleSubmit = async (e) => {
-        e.preventDefault();
-
+        // e.preventDefault();
         const inputs = await Object.entries(inputValues).reduce((newObj, [key, value]) => {
             newObj[key] = Number(value);
             return newObj;
@@ -77,7 +84,7 @@ const GamePage = () => {
             }
             let newCheck = [...result, check]
             await setResult(newCheck)
-        } else if (guess.length === 10) {
+        } else if (guess.length >= 10) {
             setIsModalOpen(true);
         }
         setInputValues({
@@ -86,6 +93,7 @@ const GamePage = () => {
             3: '',
             4: ''
         });
+        firstInputRef.current.focus();
     };
 
     // Submit request to get hint
@@ -255,12 +263,14 @@ const GamePage = () => {
                             <div>
                                 <input
                                     key={i}
+                                    ref={i === 0 ? firstInputRef : null}
                                     className='numberInput'
                                     type='number'
-                                    min={0}
+                                    min='0'
                                     max={difficulty + 6}
                                     value={inputValues[i + 1]}
                                     onChange={(e) => handleInputChange(i + 1, e.target.value)}
+                                    onKeyDown={e => handleKeyDown(e, handleSubmit)}
                                 />
                             </div>
                         ))}
