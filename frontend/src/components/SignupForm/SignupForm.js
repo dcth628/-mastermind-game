@@ -196,7 +196,7 @@ function SignupForm() {
                 boxShadow: '5px 5px 15px rgba(0,0,0,0.3)'
               }
             }}
-          >Log In</Button>
+          >Sign Up</Button>
         </div>
         <div className="link-text">
           Have an account? <a href='/login'>Log In</a><br></br>

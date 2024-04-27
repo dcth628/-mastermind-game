@@ -31,7 +31,7 @@ function Modal({ isOpen, onClose, winMessage, time, gameNumber }) {
                 <h2 style={{
                     marginTop: '50px',
                     fontSize: '20px',
-                }}>Congratulations!<br></br>
+                }}>🌟🌟🌟Congratulations!🌟🌟🌟<br></br>
                     You won the game with a score of {winMessage.score} and a finish time of {formatTime(time)}.
                     The number is {winMessage.gameNumber}.
                 </h2>
