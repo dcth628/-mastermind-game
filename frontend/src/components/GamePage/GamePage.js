@@ -5,7 +5,7 @@ import { checkResult } from '../../store/check';
 import { getHint } from '../../store/hint';
 import { updateWinGame } from '../../store/game';
 import { updateWinGuess } from '../../store/guess';
-// import Modal from '../Navigation/OpenModalMenu';
+import Modal from '../Navigation/OpenModalMenu';
 import './GamePage.css';
 
 const GamePage = () => {
@@ -38,10 +38,10 @@ const GamePage = () => {
         if (errors) return true;
 
         const maxInput = maxInputByDifficulty();
-        return Object.values(inputValues).some(value => {
+        return (Object.values(inputValues).some(value => {
             const num = Number(value);
             return value === '' || num < 0 || num > maxInput;
-        });
+        }) && guess.length > 9);
     };
 
 
@@ -57,37 +57,49 @@ const GamePage = () => {
     };
 
     const handleKeyDown = (event, callback) => {
+        if (guess.length > 9) {
+            event.preventDefault();
+            return;
+        };
+
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the default form submit action
-            callback(event); // Call the handleSubmit function
+            event.preventDefault();
+            callback(event);
         }
+    };
+
+    // Check function to update the game and guess
+    const gameCheck = async (check) => {
+        const id = check.id;
+        if (check.location === 4 && check.digit === 4) {
+            await dispatch(updateWinGame(true));
+            await dispatch(updateWinGuess({ id, time }))
+            setIsModalOpen(true);
+            setWinMessage(check);
+            clearInterval(timerId)
+        }
+        let newCheck = [...result, check]
+        await setResult(newCheck)
     };
 
     // Submit the input to get check result
     const handleSubmit = async (e) => {
-        // e.preventDefault();
+        e.preventDefault();
         const inputs = await Object.entries(inputValues).reduce((newObj, [key, value]) => {
             newObj[key] = Number(value);
             return newObj;
         }, {});
-        if (guess.length < 10) {
-            const guesses = [...guess, Object.values(inputs)];
-            setGuess(guesses);
-            let check = await dispatch(checkResult(inputs));
+        const guesses = [...guess, Object.values(inputs)];
 
-            const id = check.id;
-            if (check.location === 4 && check.digit === 4) {
-                await dispatch(updateWinGame(true));
-                await dispatch(updateWinGuess({id, time}))
+        setGuess(guesses);
+        if (guesses.length <= 10) {
+            let check = await dispatch(checkResult(inputs));
+            await gameCheck(check)
+
+            if (guesses.length === 10) {
                 setIsModalOpen(true);
-                setWinMessage(check);
-                clearInterval(timerId)
             }
-            let newCheck = [...result, check]
-            await setResult(newCheck)
-        } else if (guess.length >= 10) {
-            setIsModalOpen(true);
-        }
+        };
         setInputValues({
             1: '',
             2: '',
@@ -276,15 +288,15 @@ const GamePage = () => {
                             </div>
                         ))}
                     </div>
-                    <button className='submitBtn'  disabled={isSubmitDisabled()}  onClick={handleSubmit}>
+                    <button className='submitBtn' disabled={isSubmitDisabled()} onClick={handleSubmit}>
                         Submit
                     </button>
                     <Modal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    winMessage={winMessage}
-                    time={time}
-                    gameNumber={gameNumber}
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        winMessage={winMessage}
+                        time={time}
+                        gameNumber={gameNumber}
                     />
 
                     {
