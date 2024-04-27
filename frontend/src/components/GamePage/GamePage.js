@@ -37,6 +37,8 @@ const GamePage = () => {
         // Check for any errors first
         if (errors) return true;
 
+        if (winMessage) return true;
+
         const maxInput = maxInputByDifficulty();
         return (Object.values(inputValues).some(value => {
             const num = Number(value);
