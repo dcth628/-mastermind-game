@@ -1,6 +1,7 @@
 const express = require('express')
 const axios = require('axios');
 const session = require('express-session');
+//a middleware for Express.js, which is used to manage sessions in web applications.
 const { Game, User, Guess, Score, Sequelize } = require('../../db/models');
 const router = express.Router();
 
