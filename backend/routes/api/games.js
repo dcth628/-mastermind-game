@@ -61,7 +61,9 @@ router.post(
     async (req, res) => {
         const userId = req.user.id;
         const max = req.body.max;
-        const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
+        // const url = `https://www.random.org/integers/?num=4&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`;
+        const url = `https://www.random.org/integers/?num=1&min=0&max=${max}&col=1&base=10&format=plain&rnd=new`; // get only 1 number each time
+
         // Check the difficulty of game and update the number for scores
         if (max === 8) {
             difficulty = 2;
@@ -73,6 +75,13 @@ router.post(
 
         let numbers = [];
         try {
+            // get reponse
+            while (gameNumbers.length < 4) {
+                const number = await axios.get(url); // only one number this time
+                if (!gameNumbers.includes(number)) {
+                    gameNumbers.push(number)
+                }
+            }
             // Use axios to get the response from Random.org
             const response = await axios.get(url);
             numbers = response.data.trim().split('\n').map(Number);
