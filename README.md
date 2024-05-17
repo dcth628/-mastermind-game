@@ -217,13 +217,13 @@ Guess table has attribute `gameId` associate with game table, `number` to store 
 * Player need to restart the game after 10 attempts.
 * Player able to see the score, time and game number after win the game.
 
-#### Game History
+#### 3. Game History
 
 * Player can review their game history.
 * Player can view the history of guesses and feedback from each game.
 * Player can view the details of each game.
 
-#### Leaderboard
+#### 4. Leaderboard
 
 * Player can see their own scores.
 * Score ranking list shows from highest scores to lowest.
